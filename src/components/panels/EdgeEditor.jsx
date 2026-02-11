@@ -153,6 +153,21 @@ const EdgeEditor = ({ edge, onUpdate, onReverse, onDelete, onClose }) => {
 
       {/* Content */}
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
+        {/* Reconnect Help */}
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+          <div className="flex items-start gap-2">
+            <div className="flex-shrink-0 w-5 h-5 rounded-full bg-blue-500 mt-0.5 animate-pulse" />
+            <div className="flex-1 text-xs text-blue-900">
+              <p className="font-semibold mb-1">How to Reconnect:</p>
+              <p className="leading-relaxed">
+                With this edge selected, you'll see pulsing circle(s) on the diagram.
+                <strong> Click and drag from within the colored circle</strong> to reconnect
+                the edge to a different node.
+              </p>
+            </div>
+          </div>
+        </div>
+
         {/* Label */}
         <Input
           label="Connection Label"
