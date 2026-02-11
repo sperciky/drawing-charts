@@ -54,6 +54,38 @@ code {
   stroke-width: 3;
 }
 
+/* Edge updater handles - make them more visible and easier to grab */
+.react-flow__edgeupdater {
+  width: 16px;
+  height: 16px;
+  background: #3b82f6;
+  border: 3px solid white;
+  border-radius: 50%;
+  cursor: grab;
+  opacity: 0;
+  transition: opacity 0.2s, transform 0.2s;
+  pointer-events: all;
+}
+
+.react-flow__edge.selected .react-flow__edgeupdater,
+.react-flow__edge:hover .react-flow__edgeupdater {
+  opacity: 1;
+}
+
+.react-flow__edgeupdater:hover {
+  transform: scale(1.3);
+  background: #2563eb;
+  cursor: grabbing;
+}
+
+.react-flow__edgeupdater-source {
+  z-index: 10;
+}
+
+.react-flow__edgeupdater-target {
+  z-index: 10;
+}
+
 .react-flow__minimap {
   background-color: white;
   border: 1px solid #d1d5db;
