@@ -216,26 +216,32 @@ function App() {
         eds.map((e) => {
           if (e.id !== edgeId) return e;
 
-          // Swap source and target nodes
-          // Also swap handle types: source->target, target->source
+          // Create reversed edge with only the properties we explicitly want to keep
+          // This avoids carrying over internal ReactFlow properties that might become invalid
           const reversed = {
-            ...e,
+            id: e.id,
+            type: e.type,
             source: e.target,
             target: e.source,
             sourceHandle: convertHandleType(e.targetHandle),
             targetHandle: convertHandleType(e.sourceHandle),
+            animated: e.animated,
+            label: e.label,
+            style: e.style,
+            markerEnd: e.markerEnd,
+            markerStart: e.markerStart,
+            data: { ...e.data },
           };
 
-          // For bidirectional connections, also swap request/response
-          if (e.data?.directionType === 'bidirectional') {
-            reversed.data = {
-              ...e.data,
-              requestLabel: e.data?.responseLabel || 'response',
-              responseLabel: e.data?.requestLabel || 'request',
-              requestParameters: e.data?.responseParameters || [],
-              responseParameters: e.data?.requestParameters || [],
-            };
-          }
+          // Swap request/response parameters and labels
+          // (applies to both unidirectional and bidirectional)
+          reversed.data = {
+            ...e.data,
+            requestLabel: e.data?.responseLabel || 'response',
+            responseLabel: e.data?.requestLabel || 'request',
+            requestParameters: e.data?.responseParameters || [],
+            responseParameters: e.data?.requestParameters || [],
+          };
 
           reversedEdge = reversed;
           return reversed;
