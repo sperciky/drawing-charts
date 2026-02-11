@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Button from '../ui/Button';
 import Input from '../ui/Input';
 import Dropdown from '../ui/Dropdown';
-import { X, Trash2, Plus, ArrowLeftRight } from 'lucide-react';
+import { X, Trash2, Plus, ArrowLeftRight, ChevronUp, ChevronDown } from 'lucide-react';
 import { EDGE_TYPES } from '../../constants/colors';
 
 const EdgeEditor = ({ edge, onUpdate, onReverse, onDelete, onClose }) => {
@@ -64,6 +64,25 @@ const EdgeEditor = ({ edge, onUpdate, onReverse, onDelete, onClose }) => {
     setRequestParameters(requestParameters.filter((_, i) => i !== index));
   };
 
+  const handleUpdateRequestParameter = (index, newValue) => {
+    const updated = [...requestParameters];
+    updated[index] = newValue;
+    setRequestParameters(updated);
+  };
+
+  const handleMoveRequestParameter = (index, direction) => {
+    if (
+      (direction === 'up' && index === 0) ||
+      (direction === 'down' && index === requestParameters.length - 1)
+    ) {
+      return;
+    }
+    const updated = [...requestParameters];
+    const newIndex = direction === 'up' ? index - 1 : index + 1;
+    [updated[index], updated[newIndex]] = [updated[newIndex], updated[index]];
+    setRequestParameters(updated);
+  };
+
   const handleAddResponseParameter = () => {
     if (newResponseParameter.trim()) {
       setResponseParameters([...responseParameters, newResponseParameter.trim()]);
@@ -73,6 +92,25 @@ const EdgeEditor = ({ edge, onUpdate, onReverse, onDelete, onClose }) => {
 
   const handleRemoveResponseParameter = (index) => {
     setResponseParameters(responseParameters.filter((_, i) => i !== index));
+  };
+
+  const handleUpdateResponseParameter = (index, newValue) => {
+    const updated = [...responseParameters];
+    updated[index] = newValue;
+    setResponseParameters(updated);
+  };
+
+  const handleMoveResponseParameter = (index, direction) => {
+    if (
+      (direction === 'up' && index === 0) ||
+      (direction === 'down' && index === responseParameters.length - 1)
+    ) {
+      return;
+    }
+    const updated = [...responseParameters];
+    const newIndex = direction === 'up' ? index - 1 : index + 1;
+    [updated[index], updated[newIndex]] = [updated[newIndex], updated[index]];
+    setResponseParameters(updated);
   };
 
   const handleRequestKeyPress = (e) => {
@@ -182,14 +220,43 @@ const EdgeEditor = ({ edge, onUpdate, onReverse, onDelete, onClose }) => {
               {requestParameters.map((param, index) => (
                 <div
                   key={index}
-                  className="flex items-center justify-between bg-white border border-blue-200 rounded px-3 py-2"
+                  className="flex items-center gap-2 bg-white border border-blue-200 rounded px-2 py-2"
                 >
-                  <span className="text-sm font-mono text-gray-800">{param}</span>
+                  <div className="flex flex-col gap-0.5">
+                    <button
+                      onClick={() => handleMoveRequestParameter(index, 'up')}
+                      disabled={index === 0}
+                      className={`p-0.5 rounded hover:bg-blue-100 transition-colors ${
+                        index === 0 ? 'opacity-30 cursor-not-allowed' : ''
+                      }`}
+                      title="Move up"
+                    >
+                      <ChevronUp size={14} className="text-blue-600" />
+                    </button>
+                    <button
+                      onClick={() => handleMoveRequestParameter(index, 'down')}
+                      disabled={index === requestParameters.length - 1}
+                      className={`p-0.5 rounded hover:bg-blue-100 transition-colors ${
+                        index === requestParameters.length - 1 ? 'opacity-30 cursor-not-allowed' : ''
+                      }`}
+                      title="Move down"
+                    >
+                      <ChevronDown size={14} className="text-blue-600" />
+                    </button>
+                  </div>
+                  <input
+                    type="text"
+                    value={param}
+                    onChange={(e) => handleUpdateRequestParameter(index, e.target.value)}
+                    className="flex-1 text-sm font-mono text-gray-800 bg-transparent border-none focus:outline-none focus:ring-1 focus:ring-blue-300 rounded px-1"
+                    placeholder="Parameter name"
+                  />
                   <button
                     onClick={() => handleRemoveRequestParameter(index)}
-                    className="text-red-500 hover:text-red-700 transition-colors"
+                    className="p-1 rounded hover:bg-red-100 transition-colors"
+                    title="Remove parameter"
                   >
-                    <X size={16} />
+                    <X size={16} className="text-red-500" />
                   </button>
                 </div>
               ))}
@@ -241,14 +308,43 @@ const EdgeEditor = ({ edge, onUpdate, onReverse, onDelete, onClose }) => {
               {responseParameters.map((param, index) => (
                 <div
                   key={index}
-                  className="flex items-center justify-between bg-white border border-green-200 rounded px-3 py-2"
+                  className="flex items-center gap-2 bg-white border border-green-200 rounded px-2 py-2"
                 >
-                  <span className="text-sm font-mono text-gray-800">{param}</span>
+                  <div className="flex flex-col gap-0.5">
+                    <button
+                      onClick={() => handleMoveResponseParameter(index, 'up')}
+                      disabled={index === 0}
+                      className={`p-0.5 rounded hover:bg-green-100 transition-colors ${
+                        index === 0 ? 'opacity-30 cursor-not-allowed' : ''
+                      }`}
+                      title="Move up"
+                    >
+                      <ChevronUp size={14} className="text-green-600" />
+                    </button>
+                    <button
+                      onClick={() => handleMoveResponseParameter(index, 'down')}
+                      disabled={index === responseParameters.length - 1}
+                      className={`p-0.5 rounded hover:bg-green-100 transition-colors ${
+                        index === responseParameters.length - 1 ? 'opacity-30 cursor-not-allowed' : ''
+                      }`}
+                      title="Move down"
+                    >
+                      <ChevronDown size={14} className="text-green-600" />
+                    </button>
+                  </div>
+                  <input
+                    type="text"
+                    value={param}
+                    onChange={(e) => handleUpdateResponseParameter(index, e.target.value)}
+                    className="flex-1 text-sm font-mono text-gray-800 bg-transparent border-none focus:outline-none focus:ring-1 focus:ring-green-300 rounded px-1"
+                    placeholder="Parameter name"
+                  />
                   <button
                     onClick={() => handleRemoveResponseParameter(index)}
-                    className="text-red-500 hover:text-red-700 transition-colors"
+                    className="p-1 rounded hover:bg-red-100 transition-colors"
+                    title="Remove parameter"
                   >
-                    <X size={16} />
+                    <X size={16} className="text-red-500" />
                   </button>
                 </div>
               ))}
