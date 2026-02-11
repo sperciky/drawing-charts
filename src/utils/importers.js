@@ -100,13 +100,48 @@ export const parseXML = (xmlString) => {
     // Parse edges
     const edgeElements = xmlDoc.querySelectorAll('edges > edge');
     edgeElements.forEach((edgeEl) => {
+      const dataEl = edgeEl.querySelector('data');
+      const edgeData = {};
+
+      if (dataEl) {
+        // Parse edge data elements
+        const visualTypeEl = dataEl.querySelector('visualType');
+        const directionTypeEl = dataEl.querySelector('directionType');
+        const connectionTypeEl = dataEl.querySelector('connectionType');
+        const requestLabelEl = dataEl.querySelector('requestLabel');
+        const responseLabelEl = dataEl.querySelector('responseLabel');
+
+        if (visualTypeEl) edgeData.type = visualTypeEl.textContent;
+        if (directionTypeEl) edgeData.directionType = directionTypeEl.textContent;
+        if (connectionTypeEl) edgeData.connectionType = connectionTypeEl.textContent;
+        if (requestLabelEl) edgeData.requestLabel = requestLabelEl.textContent;
+        if (responseLabelEl) edgeData.responseLabel = responseLabelEl.textContent;
+
+        // Parse request parameters
+        const requestParamsEl = dataEl.querySelector('requestParameters');
+        if (requestParamsEl) {
+          const paramElements = requestParamsEl.querySelectorAll('parameter');
+          edgeData.requestParameters = Array.from(paramElements).map((el) => el.textContent);
+        }
+
+        // Parse response parameters
+        const responseParamsEl = dataEl.querySelector('responseParameters');
+        if (responseParamsEl) {
+          const paramElements = responseParamsEl.querySelectorAll('parameter');
+          edgeData.responseParameters = Array.from(paramElements).map((el) => el.textContent);
+        }
+      }
+
       edges.push({
         id: edgeEl.getAttribute('id'),
         source: edgeEl.getAttribute('source'),
         target: edgeEl.getAttribute('target'),
+        sourceHandle: edgeEl.getAttribute('sourceHandle') || undefined,
+        targetHandle: edgeEl.getAttribute('targetHandle') || undefined,
         label: edgeEl.getAttribute('label') || '',
         animated: edgeEl.getAttribute('animated') === 'true',
-        type: edgeEl.getAttribute('type') || 'smoothstep',
+        type: edgeEl.getAttribute('type') || 'custom',
+        data: Object.keys(edgeData).length > 0 ? edgeData : undefined,
       });
     });
 
