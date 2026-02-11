@@ -6,7 +6,6 @@ import ReactFlow, {
   useNodesState,
   useEdgesState,
   addEdge,
-  reconnectEdge,
   MarkerType,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
@@ -492,27 +491,9 @@ function App() {
     return true;
   }, []);
 
-  // Handle edge reconnection (drag and drop edge endpoint)
-  const onEdgeUpdate = useCallback(
-    (oldEdge, newConnection) => {
-      // Validate the new connection
-      if (!isValidConnection(newConnection)) {
-        console.error('❌ Edge reconnection blocked: invalid connection');
-        return;
-      }
-
-      console.log('✅ Edge reconnection valid:', {
-        oldEdge: oldEdge.id,
-        newSource: newConnection.source,
-        newTarget: newConnection.target,
-        sourceHandle: newConnection.sourceHandle,
-        targetHandle: newConnection.targetHandle,
-      });
-
-      setEdges((els) => reconnectEdge(oldEdge, newConnection, els));
-    },
-    [setEdges, isValidConnection]
-  );
+  // Drag-to-reconnect disabled (edgeUpdaterRadius={0})
+  // Users can reconnect edges using the button-based approach in EdgeEditor
+  // which provides explicit control and avoids handle type confusion
 
   // Delete edge
   const handleDeleteEdge = useCallback(
@@ -742,19 +723,10 @@ function App() {
               onEdgeClick={onEdgeClick}
               onPaneClick={onPaneClick}
               onNodeDragStop={onNodeDragStop}
-              onEdgeUpdate={onEdgeUpdate}
-              onEdgeUpdateStart={(event, edge) => {
-                // Visual feedback when starting to drag edge endpoint
-                console.log('🔄 Starting edge reconnection:', edge.id);
-              }}
-              onEdgeUpdateEnd={(event, edge) => {
-                // This fires when drag ends without successful connection
-                console.log('🔄 Edge reconnection ended:', edge.id);
-              }}
               onInit={setReactFlowInstance}
               nodeTypes={nodeTypes}
               edgeTypes={edgeTypes}
-              edgeUpdaterRadius={50}
+              edgeUpdaterRadius={0}
               fitView
               snapToGrid
               snapGrid={[15, 15]}
