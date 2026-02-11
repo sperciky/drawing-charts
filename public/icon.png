@@ -1,0 +1,3 @@
+This is a placeholder. In a real application, you would need a proper 512x512 PNG icon.
+For development, Electron will work without this file, but you'll see warnings.
+To create a proper icon, use an image editor or online tool to create a 512x512 PNG.
