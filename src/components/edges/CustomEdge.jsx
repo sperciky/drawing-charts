@@ -77,8 +77,8 @@ const CustomEdge = ({
   // BIDIRECTIONAL: Render two separate parallel lines
   if (directionType === 'bidirectional') {
     // Calculate offsets for parallel lines
-    const requestOffset = calculateOffset(15); // 15px offset upward
-    const responseOffset = calculateOffset(-15); // 15px offset downward
+    const requestOffset = calculateOffset(35); // 35px offset upward
+    const responseOffset = calculateOffset(-35); // 35px offset downward
 
     // Request line (blue, solid, arrow pointing to target)
     const [requestPath, requestLabelX, requestLabelY] = getPath(
