@@ -6,7 +6,6 @@ import ReactFlow, {
   useNodesState,
   useEdgesState,
   addEdge,
-  reconnectEdge,
   MarkerType,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
@@ -153,11 +152,14 @@ function App() {
           console.log(`🖱️ Click screen: (${clickPosX}, ${clickPosY}), flow: (${flowPosition.x}, ${flowPosition.y})`);
           console.log(`📍 Node position: (${clickedNode.position.x}, ${clickedNode.position.y})`);
 
-          // Get node dimensions (use measured if available, fallback to defaults)
-          const nodeWidth = clickedNode.width || clickedNode.measured?.width || 250;
-          const nodeHeight = clickedNode.height || clickedNode.measured?.height || 150;
+          // Get node dimensions in flow coordinates
+          // Note: CSS dimensions (250×150) are in screen pixels, but we need flow coordinates
+          // Convert screen pixels to flow coordinates using zoom level
+          const zoom = reactFlowInstance.getZoom();
+          const nodeWidth = clickedNode.width || clickedNode.measured?.width || (250 / zoom);
+          const nodeHeight = clickedNode.height || clickedNode.measured?.height || (150 / zoom);
 
-          console.log(`📏 Node dimensions: ${nodeWidth}×${nodeHeight}`);
+          console.log(`📏 Node dimensions (flow): ${nodeWidth.toFixed(1)}×${nodeHeight.toFixed(1)} (zoom: ${zoom.toFixed(2)})`);
 
           // Calculate handle center positions in flow coordinates
           const handlePositions = {
@@ -492,27 +494,9 @@ function App() {
     return true;
   }, []);
 
-  // Handle edge reconnection (drag and drop edge endpoint)
-  const onEdgeUpdate = useCallback(
-    (oldEdge, newConnection) => {
-      // Validate the new connection
-      if (!isValidConnection(newConnection)) {
-        console.error('❌ Edge reconnection blocked: invalid connection');
-        return;
-      }
-
-      console.log('✅ Edge reconnection valid:', {
-        oldEdge: oldEdge.id,
-        newSource: newConnection.source,
-        newTarget: newConnection.target,
-        sourceHandle: newConnection.sourceHandle,
-        targetHandle: newConnection.targetHandle,
-      });
-
-      setEdges((els) => reconnectEdge(oldEdge, newConnection, els));
-    },
-    [setEdges, isValidConnection]
-  );
+  // Drag-to-reconnect disabled (edgeUpdaterRadius={0})
+  // Users can reconnect edges using the button-based approach in EdgeEditor
+  // which provides explicit control and avoids handle type confusion
 
   // Delete edge
   const handleDeleteEdge = useCallback(
@@ -742,19 +726,10 @@ function App() {
               onEdgeClick={onEdgeClick}
               onPaneClick={onPaneClick}
               onNodeDragStop={onNodeDragStop}
-              onEdgeUpdate={onEdgeUpdate}
-              onEdgeUpdateStart={(event, edge) => {
-                // Visual feedback when starting to drag edge endpoint
-                console.log('🔄 Starting edge reconnection:', edge.id);
-              }}
-              onEdgeUpdateEnd={(event, edge) => {
-                // This fires when drag ends without successful connection
-                console.log('🔄 Edge reconnection ended:', edge.id);
-              }}
               onInit={setReactFlowInstance}
               nodeTypes={nodeTypes}
               edgeTypes={edgeTypes}
-              edgeUpdaterRadius={50}
+              edgeUpdaterRadius={0}
               fitView
               snapToGrid
               snapGrid={[15, 15]}
