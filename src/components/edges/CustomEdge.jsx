@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import { BaseEdge, EdgeLabelRenderer, getBezierPath, getSmoothStepPath, getStraightPath, MarkerType } from 'reactflow';
 import { adjustTwoLabels } from '../../hooks/useEdgeLabelCollision';
+import { debugLog } from '../../utils/debug';
 
 const CustomEdge = ({
   id,
@@ -28,7 +29,7 @@ const CustomEdge = ({
   } = data || {};
 
   // DEBUG LOGGING
-  console.log('🔍 CustomEdge Render:', {
+  debugLog('🔍 CustomEdge Render:', {
     edgeId: id,
     directionType,
     requestParameters,
@@ -88,7 +89,7 @@ const CustomEdge = ({
 
   // BIDIRECTIONAL: Render two separate parallel lines
   if (directionType === 'bidirectional') {
-    console.log('✅ BIDIRECTIONAL MODE ACTIVE for edge:', id);
+    debugLog('✅ BIDIRECTIONAL MODE ACTIVE for edge:', id);
 
     // Calculate offsets for parallel lines
     const requestOffset = calculateOffset(35); // 35px offset upward
@@ -111,7 +112,7 @@ const CustomEdge = ({
       sourceY + responseOffset.y
     );
 
-    console.log('📍 Label Positions:', {
+    debugLog('📍 Label Positions:', {
       requestLabelX,
       requestLabelY,
       responseLabelX,
@@ -141,15 +142,15 @@ const CustomEdge = ({
     const finalResponseX = adjustedPositions.label2.x;
     const finalResponseY = adjustedPositions.label2.y;
 
-    console.log('🎯 Final Adjusted Positions:', {
+    debugLog('🎯 Final Adjusted Positions:', {
       finalRequestX,
       finalRequestY,
       finalResponseX,
       finalResponseY,
     });
 
-    console.log('📦 Will Render Request Box?', requestParameters.length > 0);
-    console.log('📦 Will Render Response Box?', responseParameters.length > 0);
+    debugLog('📦 Will Render Request Box?', requestParameters.length > 0);
+    debugLog('📦 Will Render Response Box?', responseParameters.length > 0);
 
     const requestMarker = {
       type: MarkerType.ArrowClosed,
@@ -165,7 +166,7 @@ const CustomEdge = ({
       color: '#10b981', // green
     };
 
-    console.log('🚀 About to render bidirectional components');
+    debugLog('🚀 About to render bidirectional components');
 
     return (
       <>

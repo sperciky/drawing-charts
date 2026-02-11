@@ -9,6 +9,8 @@ import {
   Layout,
   Download,
   ChevronDown,
+  Bug,
+  Map,
 } from 'lucide-react';
 
 const Toolbar = ({
@@ -21,6 +23,10 @@ const Toolbar = ({
   onExport,
   canUndo,
   canRedo,
+  debugMode,
+  onDebugModeToggle,
+  showMiniMap,
+  onMiniMapToggle,
 }) => {
   const [showExportMenu, setShowExportMenu] = useState(false);
   const [showLayoutMenu, setShowLayoutMenu] = useState(false);
@@ -151,6 +157,37 @@ const Toolbar = ({
             ))}
           </div>
         )}
+      </div>
+
+      {/* Settings Checkboxes */}
+      <div className="flex items-center gap-3 pl-2 border-l border-gray-300">
+        {/* Debug Logging */}
+        <label className="flex items-center gap-2 cursor-pointer group">
+          <input
+            type="checkbox"
+            checked={debugMode}
+            onChange={(e) => onDebugModeToggle(e.target.checked)}
+            className="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+          />
+          <div className="flex items-center gap-1.5 text-sm text-gray-700 group-hover:text-gray-900">
+            <Bug size={14} className="text-gray-500 group-hover:text-gray-700" />
+            <span>Debug</span>
+          </div>
+        </label>
+
+        {/* MiniMap Toggle */}
+        <label className="flex items-center gap-2 cursor-pointer group">
+          <input
+            type="checkbox"
+            checked={showMiniMap}
+            onChange={(e) => onMiniMapToggle(e.target.checked)}
+            className="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+          />
+          <div className="flex items-center gap-1.5 text-sm text-gray-700 group-hover:text-gray-900">
+            <Map size={14} className="text-gray-500 group-hover:text-gray-700" />
+            <span>MiniMap</span>
+          </div>
+        </label>
       </div>
 
       <div className="flex-1" />

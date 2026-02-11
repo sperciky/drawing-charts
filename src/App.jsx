@@ -30,6 +30,7 @@ import { useExport } from './hooks/useExport';
 import { electronAPI } from './utils/ipc';
 import { generateNodeId, generateId } from './utils/helpers';
 import { DEFAULT_NODE_COLOR } from './constants/colors';
+import { setDebugMode } from './utils/debug';
 
 const nodeTypes = {
   platform: PlatformNode,
@@ -48,6 +49,14 @@ function App() {
   const [selectedNode, setSelectedNode] = useState(null);
   const [selectedEdge, setSelectedEdge] = useState(null);
   const [reactFlowInstance, setReactFlowInstance] = useState(null);
+  const [debugModeState, setDebugModeState] = useState(false);
+  const [showMiniMap, setShowMiniMap] = useState(true);
+
+  // Handle debug mode toggle
+  const handleDebugModeToggle = useCallback((enabled) => {
+    setDebugModeState(enabled);
+    setDebugMode(enabled); // Update global debug flag
+  }, []);
 
   // Hooks
   const { pushState, undo, redo, canUndo, canRedo, reset } = useHistory({
@@ -432,6 +441,10 @@ function App() {
         onExport={handleExport}
         canUndo={canUndo}
         canRedo={canRedo}
+        debugMode={debugModeState}
+        onDebugModeToggle={handleDebugModeToggle}
+        showMiniMap={showMiniMap}
+        onMiniMapToggle={setShowMiniMap}
       />
 
       <div className="flex flex-1 overflow-hidden">
@@ -481,12 +494,14 @@ function App() {
             >
               <Background color="#aaa" gap={16} />
               <Controls />
-              <MiniMap
-                nodeColor={(node) => node.data.color}
-                className="!bg-white !border-gray-300"
-                zoomable
-                pannable
-              />
+              {showMiniMap && (
+                <MiniMap
+                  nodeColor={(node) => node.data.color}
+                  className="!bg-white !border-gray-300"
+                  zoomable
+                  pannable
+                />
+              )}
             </ReactFlow>
           </div>
         </div>
