@@ -198,6 +198,51 @@ const CustomEdge = ({
           }}
         />
 
+        {/* Reconnection handles for bidirectional edges */}
+        {selected && (
+          <>
+            {/* Source handle */}
+            <EdgeLabelRenderer>
+              <div
+                style={{
+                  position: 'absolute',
+                  transform: `translate(-50%, -50%) translate(${sourceX}px,${sourceY}px)`,
+                  pointerEvents: 'all',
+                  zIndex: 1000,
+                }}
+              >
+                <div
+                  className="w-6 h-6 rounded-full bg-purple-500 border-[3px] border-white shadow-lg cursor-grab hover:scale-125 active:cursor-grabbing active:scale-110 transition-all duration-150"
+                  title="Drag to reconnect source"
+                  style={{
+                    boxShadow: '0 0 0 2px rgba(168, 85, 247, 0.6), 0 4px 12px -2px rgba(0, 0, 0, 0.3)',
+                  }}
+                />
+              </div>
+            </EdgeLabelRenderer>
+
+            {/* Target handle */}
+            <EdgeLabelRenderer>
+              <div
+                style={{
+                  position: 'absolute',
+                  transform: `translate(-50%, -50%) translate(${targetX}px,${targetY}px)`,
+                  pointerEvents: 'all',
+                  zIndex: 1000,
+                }}
+              >
+                <div
+                  className="w-6 h-6 rounded-full bg-blue-500 border-[3px] border-white shadow-lg cursor-grab hover:scale-125 active:cursor-grabbing active:scale-110 transition-all duration-150"
+                  title="Drag to reconnect target"
+                  style={{
+                    boxShadow: '0 0 0 2px rgba(59, 130, 246, 0.6), 0 4px 12px -2px rgba(0, 0, 0, 0.3)',
+                  }}
+                />
+              </div>
+            </EdgeLabelRenderer>
+          </>
+        )}
+
         {/* Request Parameters Box - Always show if we have parameters */}
         {requestParameters.length > 0 && (
           <EdgeLabelRenderer>
@@ -296,6 +341,35 @@ const CustomEdge = ({
   const hasParameters = requestParameters.length > 0 || responseParameters.length > 0;
   const showLabel = label || !hasParameters;
 
+  // Render reconnection handles when selected
+  const renderReconnectionHandles = () => {
+    if (!selected) return null;
+
+    return (
+      <>
+        {/* Target handle - draggable endpoint indicator */}
+        <EdgeLabelRenderer>
+          <div
+            style={{
+              position: 'absolute',
+              transform: `translate(-50%, -50%) translate(${targetX}px,${targetY}px)`,
+              pointerEvents: 'all',
+              zIndex: 1000,
+            }}
+          >
+            <div
+              className="w-6 h-6 rounded-full bg-blue-500 border-[3px] border-white shadow-lg cursor-grab hover:scale-125 active:cursor-grabbing active:scale-110 transition-all duration-150"
+              title="Drag to reconnect to different node"
+              style={{
+                boxShadow: '0 0 0 2px rgba(59, 130, 246, 0.6), 0 4px 12px -2px rgba(0, 0, 0, 0.3)',
+              }}
+            />
+          </div>
+        </EdgeLabelRenderer>
+      </>
+    );
+  };
+
   return (
     <>
       <BaseEdge
@@ -307,6 +381,9 @@ const CustomEdge = ({
           stroke: '#6b7280',
         }}
       />
+
+      {/* Reconnection handles */}
+      {renderReconnectionHandles()}
 
       {/* Show label if provided OR if no parameters */}
       {showLabel && label && (

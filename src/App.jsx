@@ -617,7 +617,7 @@ function App() {
               onInit={setReactFlowInstance}
               nodeTypes={nodeTypes}
               edgeTypes={edgeTypes}
-              edgeUpdaterRadius={20}
+              edgeUpdaterRadius={40}
               fitView
               snapToGrid
               snapGrid={[15, 15]}
