@@ -51,6 +51,7 @@ function App() {
   const [reactFlowInstance, setReactFlowInstance] = useState(null);
   const [debugModeState, setDebugModeState] = useState(false);
   const [showMiniMap, setShowMiniMap] = useState(true);
+  const [isConnecting, setIsConnecting] = useState(false);
 
   // Handle debug mode toggle
   const handleDebugModeToggle = useCallback((enabled) => {
@@ -369,6 +370,18 @@ function App() {
     [setEdges, isValidConnection]
   );
 
+  // Handle connection start (visual feedback)
+  const onConnectStart = useCallback((event, params) => {
+    console.log('🔗 Connection started:', params);
+    setIsConnecting(true);
+  }, []);
+
+  // Handle connection end (visual feedback)
+  const onConnectEnd = useCallback((event) => {
+    console.log('🔗 Connection ended');
+    setIsConnecting(false);
+  }, []);
+
   // Delete edge
   const handleDeleteEdge = useCallback(
     (edgeId) => {
@@ -593,6 +606,8 @@ function App() {
               onNodesChange={onNodesChange}
               onEdgesChange={onEdgesChange}
               onConnect={onConnect}
+              onConnectStart={onConnectStart}
+              onConnectEnd={onConnectEnd}
               onNodeClick={onNodeClick}
               onEdgeClick={onEdgeClick}
               onPaneClick={onPaneClick}
@@ -601,10 +616,12 @@ function App() {
               onEdgeUpdateStart={(event, edge) => {
                 // Visual feedback when starting to drag edge endpoint
                 console.log('🔄 Starting edge reconnection:', edge.id);
+                setIsConnecting(true);
               }}
               onEdgeUpdateEnd={(event, edge) => {
                 // This fires when drag ends without successful connection
                 console.log('🔄 Edge reconnection ended:', edge.id);
+                setIsConnecting(false);
               }}
               onInit={setReactFlowInstance}
               nodeTypes={nodeTypes}
@@ -616,6 +633,7 @@ function App() {
               connectionMode="loose"
               connectionRadius={30}
               isValidConnection={isValidConnection}
+              className={isConnecting ? 'connecting' : ''}
               defaultEdgeOptions={{
                 type: 'custom',
                 animated: false,
