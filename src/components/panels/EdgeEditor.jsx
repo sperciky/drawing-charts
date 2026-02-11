@@ -42,14 +42,14 @@ const EdgeEditor = ({
   }, [edge]);
 
   // Update edge whenever any field changes
+  // NOTE: Don't spread ...edge here! That would include old source/target/handles
+  // which would overwrite any reconnections. Only update fields we manage.
   useEffect(() => {
     onUpdate(edge.id, {
-      ...edge,
       label,
       animated,
       type: 'custom', // ALWAYS 'custom' for ReactFlow edgeTypes registry
       data: {
-        ...edge.data,
         label,
         type: edgeType, // Visual style type (smoothstep, bezier, straight)
         directionType,
