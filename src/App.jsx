@@ -153,28 +153,51 @@ function App() {
           console.log(`🖱️ Click screen: (${clickPosX}, ${clickPosY}), flow: (${flowPosition.x}, ${flowPosition.y})`);
           console.log(`📍 Node position: (${clickedNode.position.x}, ${clickedNode.position.y})`);
 
-          // Calculate relative click position within the node
-          // Node dimensions from PlatformNode: min-width 250px, min-height 150px
-          const nodeWidth = 250;
-          const nodeHeight = 150;
+          // Get node dimensions (use measured if available, fallback to defaults)
+          const nodeWidth = clickedNode.width || clickedNode.measured?.width || 250;
+          const nodeHeight = clickedNode.height || clickedNode.measured?.height || 150;
 
-          const relativeX = (flowPosition.x - clickedNode.position.x) / nodeWidth;
-          const relativeY = (flowPosition.y - clickedNode.position.y) / nodeHeight;
+          console.log(`📏 Node dimensions: ${nodeWidth}×${nodeHeight}`);
 
-          console.log(`📐 Relative position: (${relativeX.toFixed(2)}, ${relativeY.toFixed(2)})`);
+          // Calculate handle center positions in flow coordinates
+          const handlePositions = {
+            top: {
+              x: clickedNode.position.x + nodeWidth / 2,
+              y: clickedNode.position.y
+            },
+            right: {
+              x: clickedNode.position.x + nodeWidth,
+              y: clickedNode.position.y + nodeHeight / 2
+            },
+            bottom: {
+              x: clickedNode.position.x + nodeWidth / 2,
+              y: clickedNode.position.y + nodeHeight
+            },
+            left: {
+              x: clickedNode.position.x,
+              y: clickedNode.position.y + nodeHeight / 2
+            },
+          };
 
-          // Determine which quadrant: divide node into 4 triangular regions
-          const centerX = 0.5;
-          const centerY = 0.5;
-          const dx = relativeX - centerX;
-          const dy = relativeY - centerY;
+          // Calculate distance from click to each handle
+          const distance = (p1, p2) => Math.sqrt(
+            Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2)
+          );
 
-          // Use diagonal lines to divide the node into 4 regions
-          if (Math.abs(dx) > Math.abs(dy)) {
-            side = dx > 0 ? 'right' : 'left';
-          } else {
-            side = dy > 0 ? 'bottom' : 'top';
-          }
+          const distances = {
+            top: distance(flowPosition, handlePositions.top),
+            right: distance(flowPosition, handlePositions.right),
+            bottom: distance(flowPosition, handlePositions.bottom),
+            left: distance(flowPosition, handlePositions.left),
+          };
+
+          // Find the handle with minimum distance
+          side = Object.keys(distances).reduce((closest, current) =>
+            distances[current] < distances[closest] ? current : closest
+          );
+
+          console.log(`📏 Distances to handles:`, distances);
+          console.log(`📍 Closest handle: ${side}`);
         } else {
           // Fallback if can't get bounds
           side = 'right';
