@@ -54,36 +54,51 @@ code {
   stroke-width: 3;
 }
 
-/* Edge updater handles - make them more visible and easier to grab */
+/* Edge updater handles - always visible drag handles */
 .react-flow__edgeupdater {
-  width: 16px;
-  height: 16px;
-  background: #3b82f6;
-  border: 3px solid white;
+  width: 20px;
+  height: 20px;
+  border: 2px solid white;
   border-radius: 50%;
   cursor: grab;
-  opacity: 0;
-  transition: opacity 0.2s, transform 0.2s;
+  opacity: 1; /* Always visible */
+  transition: opacity 0.2s, transform 0.2s, background 0.2s;
   pointer-events: all;
+  z-index: 1000;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
-.react-flow__edge.selected .react-flow__edgeupdater,
-.react-flow__edge:hover .react-flow__edgeupdater {
-  opacity: 1;
+/* Source handle - blue */
+.react-flow__edgeupdater-source {
+  background: #3b82f6;
 }
 
+.react-flow__edgeupdater-source:hover {
+  background: #2563eb;
+}
+
+/* Target handle - purple */
+.react-flow__edgeupdater-target {
+  background: #a855f7;
+}
+
+.react-flow__edgeupdater-target:hover {
+  background: #9333ea;
+}
+
+/* Scale on hover for better feedback */
 .react-flow__edgeupdater:hover {
   transform: scale(1.3);
-  background: #2563eb;
   cursor: grabbing;
 }
 
-.react-flow__edgeupdater-source {
-  z-index: 10;
+/* Add ring on selected edges */
+.react-flow__edge.selected .react-flow__edgeupdater-source {
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3), 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
-.react-flow__edgeupdater-target {
-  z-index: 10;
+.react-flow__edge.selected .react-flow__edgeupdater-target {
+  box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.3), 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
 .react-flow__minimap {
