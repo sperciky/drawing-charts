@@ -8,7 +8,7 @@ import { EDGE_TYPES } from '../../constants/colors';
 const EdgeEditor = ({ edge, onUpdate, onDelete, onClose }) => {
   const [label, setLabel] = useState(edge.label || '');
   const [animated, setAnimated] = useState(edge.animated || false);
-  const [edgeType, setEdgeType] = useState(edge.type || 'smoothstep');
+  const [edgeType, setEdgeType] = useState(edge.data?.type || 'smoothstep');
   const [directionType, setDirectionType] = useState(edge.data?.directionType || 'bidirectional');
   const [connectionType, setConnectionType] = useState(edge.data?.connectionType || 'none');
 
@@ -23,7 +23,7 @@ const EdgeEditor = ({ edge, onUpdate, onDelete, onClose }) => {
   useEffect(() => {
     setLabel(edge.label || '');
     setAnimated(edge.animated || false);
-    setEdgeType(edge.type || 'smoothstep');
+    setEdgeType(edge.data?.type || 'smoothstep');
     setDirectionType(edge.data?.directionType || 'bidirectional');
     setConnectionType(edge.data?.connectionType || 'none');
     setRequestLabel(edge.data?.requestLabel || 'request');
@@ -38,11 +38,11 @@ const EdgeEditor = ({ edge, onUpdate, onDelete, onClose }) => {
       ...edge,
       label,
       animated,
-      type: edgeType,
+      type: 'custom', // ALWAYS 'custom' for ReactFlow edgeTypes registry
       data: {
         ...edge.data,
         label,
-        type: edgeType,
+        type: edgeType, // Visual style type (smoothstep, bezier, straight)
         directionType,
         connectionType,
         requestLabel,
