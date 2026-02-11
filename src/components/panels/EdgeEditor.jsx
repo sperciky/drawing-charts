@@ -9,18 +9,27 @@ const EdgeEditor = ({ edge, onUpdate, onDelete, onClose }) => {
   const [label, setLabel] = useState(edge.label || '');
   const [animated, setAnimated] = useState(edge.animated || false);
   const [edgeType, setEdgeType] = useState(edge.type || 'smoothstep');
-  const [directionType, setDirectionType] = useState(edge.data?.directionType || 'unidirectional');
+  const [directionType, setDirectionType] = useState(edge.data?.directionType || 'bidirectional');
   const [connectionType, setConnectionType] = useState(edge.data?.connectionType || 'none');
-  const [parameters, setParameters] = useState(edge.data?.parameters || []);
-  const [newParameter, setNewParameter] = useState('');
+
+  // Separate parameters for request and response
+  const [requestLabel, setRequestLabel] = useState(edge.data?.requestLabel || 'request');
+  const [responseLabel, setResponseLabel] = useState(edge.data?.responseLabel || 'response');
+  const [requestParameters, setRequestParameters] = useState(edge.data?.requestParameters || []);
+  const [responseParameters, setResponseParameters] = useState(edge.data?.responseParameters || []);
+  const [newRequestParameter, setNewRequestParameter] = useState('');
+  const [newResponseParameter, setNewResponseParameter] = useState('');
 
   useEffect(() => {
     setLabel(edge.label || '');
     setAnimated(edge.animated || false);
     setEdgeType(edge.type || 'smoothstep');
-    setDirectionType(edge.data?.directionType || 'unidirectional');
+    setDirectionType(edge.data?.directionType || 'bidirectional');
     setConnectionType(edge.data?.connectionType || 'none');
-    setParameters(edge.data?.parameters || []);
+    setRequestLabel(edge.data?.requestLabel || 'request');
+    setResponseLabel(edge.data?.responseLabel || 'response');
+    setRequestParameters(edge.data?.requestParameters || []);
+    setResponseParameters(edge.data?.responseParameters || []);
   }, [edge]);
 
   // Update edge whenever any field changes
@@ -36,26 +45,47 @@ const EdgeEditor = ({ edge, onUpdate, onDelete, onClose }) => {
         type: edgeType,
         directionType,
         connectionType,
-        parameters,
+        requestLabel,
+        responseLabel,
+        requestParameters,
+        responseParameters,
       },
     });
-  }, [edge.id, label, animated, edgeType, directionType, connectionType, parameters, onUpdate]);
+  }, [edge.id, label, animated, edgeType, directionType, connectionType, requestLabel, responseLabel, requestParameters, responseParameters, onUpdate]);
 
-  const handleAddParameter = () => {
-    if (newParameter.trim()) {
-      setParameters([...parameters, newParameter.trim()]);
-      setNewParameter('');
+  const handleAddRequestParameter = () => {
+    if (newRequestParameter.trim()) {
+      setRequestParameters([...requestParameters, newRequestParameter.trim()]);
+      setNewRequestParameter('');
     }
   };
 
-  const handleRemoveParameter = (index) => {
-    setParameters(parameters.filter((_, i) => i !== index));
+  const handleRemoveRequestParameter = (index) => {
+    setRequestParameters(requestParameters.filter((_, i) => i !== index));
   };
 
-  const handleKeyPress = (e) => {
+  const handleAddResponseParameter = () => {
+    if (newResponseParameter.trim()) {
+      setResponseParameters([...responseParameters, newResponseParameter.trim()]);
+      setNewResponseParameter('');
+    }
+  };
+
+  const handleRemoveResponseParameter = (index) => {
+    setResponseParameters(responseParameters.filter((_, i) => i !== index));
+  };
+
+  const handleRequestKeyPress = (e) => {
     if (e.key === 'Enter') {
       e.preventDefault();
-      handleAddParameter();
+      handleAddRequestParameter();
+    }
+  };
+
+  const handleResponseKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleAddResponseParameter();
     }
   };
 
@@ -89,30 +119,13 @@ const EdgeEditor = ({ edge, onUpdate, onDelete, onClose }) => {
           placeholder="e.g., HTTP/REST, SQL Query"
         />
 
-        {/* Direction Type */}
-        <Dropdown
-          label="Flow Direction"
-          options={[
-            { label: '→ Unidirectional', value: 'unidirectional' },
-            { label: '↔ Bidirectional', value: 'bidirectional' },
-          ]}
-          value={directionType}
-          onChange={setDirectionType}
-        />
-
-        {/* Connection Role - only for unidirectional */}
-        {directionType === 'unidirectional' && (
-          <Dropdown
-            label="Connection Role (Optional)"
-            options={[
-              { label: 'None (Gray)', value: 'none' },
-              { label: '→ Request (Blue)', value: 'request' },
-              { label: '← Response (Green)', value: 'response' },
-            ]}
-            value={connectionType}
-            onChange={setConnectionType}
-          />
-        )}
+        {/* Direction Type - Hidden, always bidirectional now */}
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-sm">
+          <p className="font-medium text-blue-900 mb-1">💡 Connection Mode</p>
+          <p className="text-blue-700 text-xs">
+            This connection will display as <strong>two separate lines</strong>: one for the request and one for the response, each with its own parameters.
+          </p>
+        </div>
 
         {/* Edge Type */}
         <Dropdown
@@ -122,32 +135,32 @@ const EdgeEditor = ({ edge, onUpdate, onDelete, onClose }) => {
           onChange={setEdgeType}
         />
 
-        {/* Parameters */}
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <label className="text-sm font-medium text-gray-700">Parameters Delivered</label>
-            {connectionType !== 'none' && (
-              <span className={`text-xs px-2 py-0.5 rounded ${
-                connectionType === 'request'
-                  ? 'bg-blue-100 text-blue-700'
-                  : 'bg-green-100 text-green-700'
-              }`}>
-                {connectionType === 'request' ? '→ Request' : '← Response'}
-              </span>
-            )}
+        {/* REQUEST PARAMETERS */}
+        <div className="space-y-2 border border-blue-200 rounded-lg p-3 bg-blue-50">
+          <div className="flex items-center justify-between mb-2">
+            <label className="text-sm font-semibold text-blue-900">→ Request Parameters</label>
           </div>
 
-          {/* Add Parameter Input */}
+          {/* Request Label */}
+          <Input
+            label="Request Line Label"
+            value={requestLabel}
+            onChange={(e) => setRequestLabel(e.target.value)}
+            placeholder="e.g., http request"
+            className="text-sm"
+          />
+
+          {/* Add Request Parameter Input */}
           <div className="flex gap-2">
             <Input
-              value={newParameter}
-              onChange={(e) => setNewParameter(e.target.value)}
-              onKeyPress={handleKeyPress}
-              placeholder="e.g., userId, productId"
+              value={newRequestParameter}
+              onChange={(e) => setNewRequestParameter(e.target.value)}
+              onKeyPress={handleRequestKeyPress}
+              placeholder="e.g., userId, sessionToken"
               className="flex-1"
             />
             <Button
-              onClick={handleAddParameter}
+              onClick={handleAddRequestParameter}
               variant="secondary"
               size="sm"
               icon={<Plus size={16} />}
@@ -156,17 +169,17 @@ const EdgeEditor = ({ edge, onUpdate, onDelete, onClose }) => {
             </Button>
           </div>
 
-          {/* Parameters List */}
-          {parameters.length > 0 ? (
+          {/* Request Parameters List */}
+          {requestParameters.length > 0 ? (
             <div className="space-y-1 mt-2">
-              {parameters.map((param, index) => (
+              {requestParameters.map((param, index) => (
                 <div
                   key={index}
-                  className="flex items-center justify-between bg-gray-50 border border-gray-200 rounded px-3 py-2"
+                  className="flex items-center justify-between bg-white border border-blue-200 rounded px-3 py-2"
                 >
                   <span className="text-sm font-mono text-gray-800">{param}</span>
                   <button
-                    onClick={() => handleRemoveParameter(index)}
+                    onClick={() => handleRemoveRequestParameter(index)}
                     className="text-red-500 hover:text-red-700 transition-colors"
                   >
                     <X size={16} />
@@ -175,12 +188,67 @@ const EdgeEditor = ({ edge, onUpdate, onDelete, onClose }) => {
               ))}
             </div>
           ) : (
-            <div className="text-xs text-gray-500 italic mt-2 p-2 bg-gray-50 rounded border border-gray-200">
-              {connectionType === 'request'
-                ? 'Add parameters sent in the request (e.g., userId, sessionToken)'
-                : connectionType === 'response'
-                ? 'Add parameters returned in the response (e.g., user, email, status)'
-                : 'Add parameters transmitted through this connection'}
+            <div className="text-xs text-blue-600 italic mt-2 p-2 bg-blue-100 rounded border border-blue-200">
+              Add parameters sent in the request
+            </div>
+          )}
+        </div>
+
+        {/* RESPONSE PARAMETERS */}
+        <div className="space-y-2 border border-green-200 rounded-lg p-3 bg-green-50">
+          <div className="flex items-center justify-between mb-2">
+            <label className="text-sm font-semibold text-green-900">← Response Parameters</label>
+          </div>
+
+          {/* Response Label */}
+          <Input
+            label="Response Line Label"
+            value={responseLabel}
+            onChange={(e) => setResponseLabel(e.target.value)}
+            placeholder="e.g., http response"
+            className="text-sm"
+          />
+
+          {/* Add Response Parameter Input */}
+          <div className="flex gap-2">
+            <Input
+              value={newResponseParameter}
+              onChange={(e) => setNewResponseParameter(e.target.value)}
+              onKeyPress={handleResponseKeyPress}
+              placeholder="e.g., user, email, status"
+              className="flex-1"
+            />
+            <Button
+              onClick={handleAddResponseParameter}
+              variant="secondary"
+              size="sm"
+              icon={<Plus size={16} />}
+            >
+              Add
+            </Button>
+          </div>
+
+          {/* Response Parameters List */}
+          {responseParameters.length > 0 ? (
+            <div className="space-y-1 mt-2">
+              {responseParameters.map((param, index) => (
+                <div
+                  key={index}
+                  className="flex items-center justify-between bg-white border border-green-200 rounded px-3 py-2"
+                >
+                  <span className="text-sm font-mono text-gray-800">{param}</span>
+                  <button
+                    onClick={() => handleRemoveResponseParameter(index)}
+                    className="text-red-500 hover:text-red-700 transition-colors"
+                  >
+                    <X size={16} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-xs text-green-600 italic mt-2 p-2 bg-green-100 rounded border border-green-200">
+              Add parameters returned in the response
             </div>
           )}
         </div>
@@ -203,51 +271,57 @@ const EdgeEditor = ({ edge, onUpdate, onDelete, onClose }) => {
         </div>
 
         {/* Visual Preview */}
-        {parameters.length > 0 && (
-          <div className="bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg p-3">
-            <p className="text-xs font-medium text-gray-700 mb-2">
+        {(requestParameters.length > 0 || responseParameters.length > 0) && (
+          <div className="bg-gradient-to-r from-blue-50 to-green-50 border border-gray-300 rounded-lg p-3">
+            <p className="text-xs font-medium text-gray-700 mb-3">
               Preview on Diagram:
             </p>
-            <div className={`inline-block px-3 py-2 ${
-              connectionType === 'request'
-                ? 'bg-blue-50 border-blue-300 text-blue-900'
-                : connectionType === 'response'
-                ? 'bg-green-50 border-green-300 text-green-900'
-                : directionType === 'bidirectional'
-                ? 'bg-purple-50 border-purple-300 text-purple-900'
-                : 'bg-gray-50 border-gray-300 text-gray-900'
-            } border-2 rounded-lg shadow-sm text-xs font-medium`}>
-              {(label || connectionType !== 'none' || directionType === 'bidirectional') && (
-                <div className="font-semibold flex items-center gap-1 mb-1">
-                  {connectionType === 'request' && (
+            <div className="space-y-3">
+              {/* Request Preview */}
+              {requestParameters.length > 0 && (
+                <div className="inline-block px-3 py-2 bg-blue-50 border-blue-300 text-blue-900 border-2 rounded-lg shadow-sm text-xs font-medium">
+                  <div className="font-semibold flex items-center gap-1 mb-1">
                     <span className="text-base">→</span>
-                  )}
-                  {connectionType === 'response' && (
-                    <span className="text-base">←</span>
-                  )}
-                  {directionType === 'bidirectional' && (
-                    <span className="text-base">↔</span>
-                  )}
-                  <span>{label || (connectionType === 'request'
-                    ? 'Request'
-                    : connectionType === 'response'
-                    ? 'Response'
-                    : directionType === 'bidirectional' ? 'Bidirectional' : 'Connection')}</span>
+                    <span>{requestLabel}</span>
+                  </div>
+                  <div className="mt-1.5 pt-1.5 border-t border-current border-opacity-20">
+                    <div className="text-[10px] opacity-60 mb-0.5 uppercase tracking-wide">
+                      Parameters
+                    </div>
+                    <div className="font-mono text-xs opacity-90">
+                      {requestParameters.map((param, idx) => (
+                        <div key={idx} className="flex items-center gap-1">
+                          <span className="opacity-50">•</span>
+                          <span className="font-semibold">{param}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               )}
-              <div className={(label || connectionType !== 'none' || directionType === 'bidirectional') ? "mt-1.5 pt-1.5 border-t border-current border-opacity-20" : ""}>
-                <div className="text-[10px] opacity-60 mb-0.5 uppercase tracking-wide">
-                  Parameters
-                </div>
-                <div className="font-mono text-xs opacity-90">
-                  {parameters.map((param, idx) => (
-                    <div key={idx} className="flex items-center gap-1">
-                      <span className="opacity-50">•</span>
-                      <span className="font-semibold">{param}</span>
+
+              {/* Response Preview */}
+              {responseParameters.length > 0 && (
+                <div className="inline-block px-3 py-2 bg-green-50 border-green-300 text-green-900 border-2 rounded-lg shadow-sm text-xs font-medium">
+                  <div className="font-semibold flex items-center gap-1 mb-1">
+                    <span className="text-base">←</span>
+                    <span>{responseLabel}</span>
+                  </div>
+                  <div className="mt-1.5 pt-1.5 border-t border-current border-opacity-20">
+                    <div className="text-[10px] opacity-60 mb-0.5 uppercase tracking-wide">
+                      Parameters
                     </div>
-                  ))}
+                    <div className="font-mono text-xs opacity-90">
+                      {responseParameters.map((param, idx) => (
+                        <div key={idx} className="flex items-center gap-1">
+                          <span className="opacity-50">•</span>
+                          <span className="font-semibold">{param}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           </div>
         )}
@@ -261,11 +335,6 @@ const EdgeEditor = ({ edge, onUpdate, onDelete, onClose }) => {
           <p>
             To: <span className="font-mono">{edge.target}</span>
           </p>
-          {(connectionType === 'request' || connectionType === 'response') && (
-            <p className="mt-2 pt-2 border-t border-gray-300 text-blue-600">
-              💡 Tip: Create both Request and Response connections to see them side-by-side
-            </p>
-          )}
         </div>
       </div>
 
