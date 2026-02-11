@@ -94,7 +94,7 @@ const CustomEdge = ({
     const requestOffset = calculateOffset(35); // 35px offset upward
     const responseOffset = calculateOffset(-35); // 35px offset downward
 
-    // Request line (blue, solid, arrow pointing to target)
+    // Request line (blue, solid, arrow pointing FROM source TO target)
     const [requestPath, requestLabelX, requestLabelY] = getPath(
       sourceX + requestOffset.x,
       sourceY + requestOffset.y,
@@ -102,12 +102,13 @@ const CustomEdge = ({
       targetY + requestOffset.y
     );
 
-    // Response line (green, dashed, arrow pointing to source)
+    // Response line (green, dashed, arrow pointing FROM target TO source)
+    // Draw in reverse direction so markerEnd points from target to source
     const [responsePath, responseLabelX, responseLabelY] = getPath(
-      sourceX + responseOffset.x,
-      sourceY + responseOffset.y,
       targetX + responseOffset.x,
-      targetY + responseOffset.y
+      targetY + responseOffset.y,
+      sourceX + responseOffset.x,
+      sourceY + responseOffset.y
     );
 
     console.log('📍 Label Positions:', {
@@ -179,10 +180,10 @@ const CustomEdge = ({
           }}
         />
 
-        {/* Response Line - Green, Dashed, Arrow to Source */}
+        {/* Response Line - Green, Dashed, Arrow FROM target TO source */}
         <BaseEdge
           path={responsePath}
-          markerStart={responseMarker}
+          markerEnd={responseMarker}
           style={{
             ...style,
             strokeWidth: selected ? 3 : 2,
