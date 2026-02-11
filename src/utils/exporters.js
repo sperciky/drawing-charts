@@ -22,9 +22,12 @@ export const exportJSON = (nodes, edges, metadata = {}) => {
       id: edge.id,
       source: edge.source,
       target: edge.target,
+      sourceHandle: edge.sourceHandle,
+      targetHandle: edge.targetHandle,
       label: edge.label || '',
       animated: edge.animated || false,
-      type: edge.type || 'smoothstep',
+      type: edge.type || 'custom',
+      data: edge.data || {}, // Includes requestLabel, responseLabel, requestParameters, responseParameters, etc.
     })),
   };
 
@@ -66,12 +69,60 @@ export const exportXML = (nodes, edges, metadata = {}) => {
   xml += '  <edges>\n';
   edges.forEach((edge) => {
     xml += `    <edge id="${edge.id}" source="${edge.source}" target="${edge.target}"`;
+    if (edge.sourceHandle) {
+      xml += ` sourceHandle="${edge.sourceHandle}"`;
+    }
+    if (edge.targetHandle) {
+      xml += ` targetHandle="${edge.targetHandle}"`;
+    }
     if (edge.label) {
       xml += ` label="${escapeXml(edge.label)}"`;
     }
     xml += ` animated="${edge.animated || false}"`;
-    xml += ` type="${edge.type || 'smoothstep'}"`;
-    xml += '/>\n';
+    xml += ` type="${edge.type || 'custom'}"`;
+    xml += '>\n';
+
+    // Edge data (requestParameters, responseParameters, etc.)
+    if (edge.data) {
+      xml += '      <data>\n';
+      if (edge.data.type) {
+        xml += `        <visualType>${escapeXml(edge.data.type)}</visualType>\n`;
+      }
+      if (edge.data.directionType) {
+        xml += `        <directionType>${escapeXml(edge.data.directionType)}</directionType>\n`;
+      }
+      if (edge.data.connectionType) {
+        xml += `        <connectionType>${escapeXml(edge.data.connectionType)}</connectionType>\n`;
+      }
+      if (edge.data.requestLabel) {
+        xml += `        <requestLabel>${escapeXml(edge.data.requestLabel)}</requestLabel>\n`;
+      }
+      if (edge.data.responseLabel) {
+        xml += `        <responseLabel>${escapeXml(edge.data.responseLabel)}</responseLabel>\n`;
+      }
+
+      // Request parameters
+      if (edge.data.requestParameters && edge.data.requestParameters.length > 0) {
+        xml += '        <requestParameters>\n';
+        edge.data.requestParameters.forEach((param) => {
+          xml += `          <parameter>${escapeXml(param)}</parameter>\n`;
+        });
+        xml += '        </requestParameters>\n';
+      }
+
+      // Response parameters
+      if (edge.data.responseParameters && edge.data.responseParameters.length > 0) {
+        xml += '        <responseParameters>\n';
+        edge.data.responseParameters.forEach((param) => {
+          xml += `          <parameter>${escapeXml(param)}</parameter>\n`;
+        });
+        xml += '        </responseParameters>\n';
+      }
+
+      xml += '      </data>\n';
+    }
+
+    xml += '    </edge>\n';
   });
   xml += '  </edges>\n';
 
