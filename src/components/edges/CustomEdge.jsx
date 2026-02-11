@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { BaseEdge, EdgeLabelRenderer, getBezierPath, getSmoothStepPath, getStraightPath, MarkerType } from 'reactflow';
+import { adjustTwoLabels } from '../../hooks/useEdgeLabelCollision';
 
 const CustomEdge = ({
   id,
@@ -96,6 +97,29 @@ const CustomEdge = ({
       targetY + responseOffset.y
     );
 
+    // Apply D3-force collision detection to prevent label overlap
+    const adjustedPositions = useMemo(() => {
+      if (requestParameters.length === 0 || responseParameters.length === 0) {
+        // If only one has parameters, no collision possible
+        return {
+          label1: { x: requestLabelX, y: requestLabelY },
+          label2: { x: responseLabelX, y: responseLabelY },
+        };
+      }
+
+      // Both have parameters - check for collision
+      return adjustTwoLabels(
+        { x: requestLabelX, y: requestLabelY, width: 140, height: 70 },
+        { x: responseLabelX, y: responseLabelY, width: 140, height: 70 },
+        { minDistance: 100, iterations: 120 }
+      );
+    }, [requestLabelX, requestLabelY, responseLabelX, responseLabelY, requestParameters.length, responseParameters.length]);
+
+    const finalRequestX = adjustedPositions.label1.x;
+    const finalRequestY = adjustedPositions.label1.y;
+    const finalResponseX = adjustedPositions.label2.x;
+    const finalResponseY = adjustedPositions.label2.y;
+
     const requestMarker = {
       type: MarkerType.ArrowClosed,
       width: 20,
@@ -141,7 +165,7 @@ const CustomEdge = ({
             <div
               style={{
                 position: 'absolute',
-                transform: `translate(-50%, -50%) translate(${requestLabelX}px,${requestLabelY}px)`,
+                transform: `translate(-50%, -50%) translate(${finalRequestX}px,${finalRequestY}px)`,
                 pointerEvents: 'all',
               }}
               className="nodrag nopan"
@@ -182,7 +206,7 @@ const CustomEdge = ({
             <div
               style={{
                 position: 'absolute',
-                transform: `translate(-50%, -50%) translate(${responseLabelX}px,${responseLabelY}px)`,
+                transform: `translate(-50%, -50%) translate(${finalResponseX}px,${finalResponseY}px)`,
                 pointerEvents: 'all',
               }}
               className="nodrag nopan"

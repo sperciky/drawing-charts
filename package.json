@@ -16,13 +16,14 @@
     "electron:build:linux": "vite build && electron-builder --linux"
   },
   "dependencies": {
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "reactflow": "^11.10.4",
+    "d3-force": "^3.0.0",
     "dagre": "^0.8.5",
     "html-to-image": "^1.11.11",
     "jspdf": "^2.5.1",
-    "lucide-react": "^0.300.0"
+    "lucide-react": "^0.300.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "reactflow": "^11.10.4"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.2.1",
@@ -46,16 +47,25 @@
       "electron/**/*"
     ],
     "win": {
-      "target": ["nsis", "portable"],
+      "target": [
+        "nsis",
+        "portable"
+      ],
       "icon": "public/icon.png"
     },
     "mac": {
-      "target": ["dmg", "zip"],
+      "target": [
+        "dmg",
+        "zip"
+      ],
       "icon": "public/icon.png",
       "category": "public.app-category.productivity"
     },
     "linux": {
-      "target": ["AppImage", "deb"],
+      "target": [
+        "AppImage",
+        "deb"
+      ],
       "icon": "public/icon.png",
       "category": "Graphics"
     },
