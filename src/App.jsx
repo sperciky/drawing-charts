@@ -28,7 +28,6 @@ import { useExport } from './hooks/useExport';
 // Utils
 import { electronAPI } from './utils/ipc';
 import { generateNodeId, generateId } from './utils/helpers';
-import { initialNodes, initialEdges } from './constants/initialData';
 import { DEFAULT_NODE_COLOR } from './constants/colors';
 
 const nodeTypes = {
@@ -43,16 +42,16 @@ function App() {
   const reactFlowWrapper = useRef(null);
   const reactFlowRef = useRef(null);
 
-  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
-  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
+  const [nodes, setNodes, onNodesChange] = useNodesState([]);
+  const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [selectedNode, setSelectedNode] = useState(null);
   const [selectedEdge, setSelectedEdge] = useState(null);
   const [reactFlowInstance, setReactFlowInstance] = useState(null);
 
   // Hooks
   const { pushState, undo, redo, canUndo, canRedo, reset } = useHistory({
-    nodes: initialNodes,
-    edges: initialEdges,
+    nodes: [],
+    edges: [],
   });
   const { checkAndResolveCollision } = useCollision();
   const { applyAutoLayout } = useAutoLayout();
@@ -270,11 +269,12 @@ function App() {
       if (!confirmed.confirmed) return;
     }
 
-    setNodes(initialNodes);
-    setEdges(initialEdges);
+    // Start with completely empty board
+    setNodes([]);
+    setEdges([]);
     setSelectedNode(null);
     setSelectedEdge(null);
-    reset({ nodes: initialNodes, edges: initialEdges });
+    reset({ nodes: [], edges: [] });
     newFile();
   }, [nodes, edges, setNodes, setEdges, reset, newFile]);
 
