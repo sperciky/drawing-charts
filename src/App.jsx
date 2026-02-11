@@ -194,6 +194,19 @@ function App() {
     [setEdges]
   );
 
+  // Helper to convert handle type when reversing
+  // Converts "left-source" to "left-target" and vice versa
+  const convertHandleType = (handleId) => {
+    if (!handleId) return handleId;
+    if (handleId.endsWith('-source')) {
+      return handleId.replace('-source', '-target');
+    }
+    if (handleId.endsWith('-target')) {
+      return handleId.replace('-target', '-source');
+    }
+    return handleId;
+  };
+
   // Reverse edge direction (swap source and target)
   const handleReverseEdge = useCallback(
     (edgeId) => {
@@ -201,13 +214,14 @@ function App() {
         eds.map((e) => {
           if (e.id !== edgeId) return e;
 
-          // Swap source and target
+          // Swap source and target nodes
+          // Also swap handle types: source->target, target->source
           const reversed = {
             ...e,
             source: e.target,
             target: e.source,
-            sourceHandle: e.targetHandle,
-            targetHandle: e.sourceHandle,
+            sourceHandle: convertHandleType(e.targetHandle),
+            targetHandle: convertHandleType(e.sourceHandle),
           };
 
           // For bidirectional connections, also swap request/response
