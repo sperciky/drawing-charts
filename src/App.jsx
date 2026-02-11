@@ -6,6 +6,7 @@ import ReactFlow, {
   useNodesState,
   useEdgesState,
   addEdge,
+  updateEdge,
   MarkerType,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
@@ -221,20 +222,7 @@ function App() {
   // Handle edge reconnection (drag and drop edge endpoint)
   const onEdgeUpdate = useCallback(
     (oldEdge, newConnection) => {
-      setEdges((els) =>
-        els.map((e) => {
-          if (e.id === oldEdge.id) {
-            return {
-              ...e,
-              source: newConnection.source,
-              target: newConnection.target,
-              sourceHandle: newConnection.sourceHandle,
-              targetHandle: newConnection.targetHandle,
-            };
-          }
-          return e;
-        })
-      );
+      setEdges((els) => updateEdge(oldEdge, newConnection, els));
     },
     [setEdges]
   );
