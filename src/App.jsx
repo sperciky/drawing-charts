@@ -119,66 +119,71 @@ function App() {
   }, [nodes, edges]);
 
   // Handle node click
-  const onNodeClick = useCallback((event, node) => {
+  const onNodeClick = useCallback((event, clickedNode) => {
     // If in reconnection mode, reconnect the edge
     if (reconnectMode) {
       const { edgeId, endpoint } = reconnectMode;
 
-      setEdges((eds) =>
-        eds.map((edge) => {
-          if (edge.id !== edgeId) return edge;
+      console.log(`🔄 Reconnecting ${endpoint} to node:`, clickedNode.id, clickedNode.data.name);
 
-          // Find the other node to determine handle positions
-          let otherNodeId;
-          if (endpoint === 'source') {
-            otherNodeId = edge.target;
-          } else {
-            otherNodeId = edge.source;
-          }
+      // Find the edge being reconnected
+      const targetEdge = edges.find(e => e.id === edgeId);
+      if (!targetEdge) {
+        console.error('❌ Edge not found:', edgeId);
+        setReconnectMode(null);
+        return;
+      }
 
-          const otherNode = nodes.find(n => n.id === otherNodeId);
+      // Find the other node to determine handle positions
+      const otherNodeId = endpoint === 'source' ? targetEdge.target : targetEdge.source;
+      const otherNode = nodes.find(n => n.id === otherNodeId);
 
-          if (endpoint === 'source') {
-            // Reconnecting source to clicked node
-            // Determine which side to connect from based on relative positions
-            let sourceHandle;
-            if (otherNode) {
-              sourceHandle = node.position.x < otherNode.position.x ? 'right-source' : 'left-source';
-            } else {
-              sourceHandle = 'right-source'; // default
-            }
+      console.log('📍 Other node:', otherNodeId, otherNode?.data.name);
+      console.log('📍 Clicked node position:', clickedNode.position);
+      console.log('📍 Other node position:', otherNode?.position);
 
-            return {
-              ...edge,
-              source: node.id,
-              sourceHandle,
-            };
-          } else {
-            // Reconnecting target to clicked node
-            let targetHandle;
-            if (otherNode) {
-              targetHandle = node.position.x > otherNode.position.x ? 'left-target' : 'right-target';
-            } else {
-              targetHandle = 'left-target'; // default
-            }
+      // Determine handles based on relative positions
+      let newHandle;
+      if (endpoint === 'source') {
+        // Reconnecting source: if new source is LEFT of target, use right-source
+        newHandle = otherNode && clickedNode.position.x < otherNode.position.x
+          ? 'right-source'
+          : 'left-source';
 
-            return {
-              ...edge,
-              target: node.id,
-              targetHandle,
-            };
-          }
-        })
-      );
+        console.log(`✅ Setting source: ${clickedNode.id}, handle: ${newHandle}`);
+
+        setEdges((eds) =>
+          eds.map((edge) =>
+            edge.id === edgeId
+              ? { ...edge, source: clickedNode.id, sourceHandle: newHandle }
+              : edge
+          )
+        );
+      } else {
+        // Reconnecting target: if new target is RIGHT of source, use left-target
+        newHandle = otherNode && clickedNode.position.x > otherNode.position.x
+          ? 'left-target'
+          : 'right-target';
+
+        console.log(`✅ Setting target: ${clickedNode.id}, handle: ${newHandle}`);
+
+        setEdges((eds) =>
+          eds.map((edge) =>
+            edge.id === edgeId
+              ? { ...edge, target: clickedNode.id, targetHandle: newHandle }
+              : edge
+          )
+        );
+      }
 
       setReconnectMode(null);
-      console.log(`✅ Edge ${edgeId} reconnected: ${endpoint} → ${node.id}`);
+      console.log(`✅ Edge ${edgeId} reconnected: ${endpoint} → ${clickedNode.id} (${clickedNode.data.name})`);
       return;
     }
 
-    setSelectedNode(node);
+    setSelectedNode(clickedNode);
     setSelectedEdge(null);
-  }, [reconnectMode, setEdges, nodes]);
+  }, [reconnectMode, setEdges, nodes, edges]);
 
   // Handle edge click
   const onEdgeClick = useCallback((event, edge) => {
