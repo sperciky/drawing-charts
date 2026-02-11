@@ -401,8 +401,8 @@ function App() {
         }
       }
 
-      // Undo/Redo - works even when typing
-      if (event.ctrlKey || event.metaKey) {
+      // Undo/Redo - only when NOT typing in input fields
+      if (!isTyping && (event.ctrlKey || event.metaKey)) {
         if (event.key === 'z' && !event.shiftKey) {
           event.preventDefault();
           handleUndo();
