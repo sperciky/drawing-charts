@@ -9,6 +9,7 @@ const EdgeEditor = ({ edge, onUpdate, onDelete, onClose }) => {
   const [label, setLabel] = useState(edge.label || '');
   const [animated, setAnimated] = useState(edge.animated || false);
   const [edgeType, setEdgeType] = useState(edge.type || 'smoothstep');
+  const [directionType, setDirectionType] = useState(edge.data?.directionType || 'unidirectional');
   const [connectionType, setConnectionType] = useState(edge.data?.connectionType || 'request');
   const [parameters, setParameters] = useState(edge.data?.parameters || []);
   const [newParameter, setNewParameter] = useState('');
@@ -17,6 +18,7 @@ const EdgeEditor = ({ edge, onUpdate, onDelete, onClose }) => {
     setLabel(edge.label || '');
     setAnimated(edge.animated || false);
     setEdgeType(edge.type || 'smoothstep');
+    setDirectionType(edge.data?.directionType || 'unidirectional');
     setConnectionType(edge.data?.connectionType || 'request');
     setParameters(edge.data?.parameters || []);
   }, [edge]);
@@ -31,6 +33,7 @@ const EdgeEditor = ({ edge, onUpdate, onDelete, onClose }) => {
         ...edge.data,
         label,
         type: edgeType,
+        directionType,
         connectionType,
         parameters,
       },
@@ -39,7 +42,7 @@ const EdgeEditor = ({ edge, onUpdate, onDelete, onClose }) => {
 
   useEffect(() => {
     handleUpdate();
-  }, [label, animated, edgeType, connectionType, parameters]);
+  }, [label, animated, edgeType, directionType, connectionType, parameters]);
 
   const handleAddParameter = () => {
     if (newParameter.trim()) {
@@ -89,16 +92,30 @@ const EdgeEditor = ({ edge, onUpdate, onDelete, onClose }) => {
           placeholder="e.g., HTTP/REST, SQL Query"
         />
 
-        {/* Connection Direction Type */}
+        {/* Direction Type */}
         <Dropdown
-          label="Direction Type"
+          label="Flow Direction"
           options={[
-            { label: '→ Request', value: 'request' },
-            { label: '← Response', value: 'response' },
+            { label: '→ Unidirectional', value: 'unidirectional' },
+            { label: '↔ Bidirectional', value: 'bidirectional' },
+            { label: '⇄ Request/Response Pair', value: 'request-response' },
           ]}
-          value={connectionType}
-          onChange={setConnectionType}
+          value={directionType}
+          onChange={setDirectionType}
         />
+
+        {/* Connection Type - only show for request-response */}
+        {directionType === 'request-response' && (
+          <Dropdown
+            label="This Connection Is"
+            options={[
+              { label: '→ Request', value: 'request' },
+              { label: '← Response', value: 'response' },
+            ]}
+            value={connectionType}
+            onChange={setConnectionType}
+          />
+        )}
 
         {/* Edge Type */}
         <Dropdown

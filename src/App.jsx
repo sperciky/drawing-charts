@@ -109,11 +109,13 @@ function App() {
         data: {
           label: '',
           type: 'smoothstep',
-          connectionType: 'request', // Default to request
+          directionType: 'unidirectional', // unidirectional, bidirectional, request-response
+          connectionType: 'request', // request or response (used for request-response pairs)
           parameters: [], // Array of parameter names
         },
       };
-      setEdges((eds) => addEdge(newEdge, eds));
+      // Directly add to edges instead of using addEdge to avoid duplicate prevention
+      setEdges((eds) => [...eds, newEdge]);
     },
     [setEdges]
   );
@@ -412,6 +414,8 @@ function App() {
               fitView
               snapToGrid
               snapGrid={[15, 15]}
+              connectionMode="loose"
+              isValidConnection={() => true}
               defaultEdgeOptions={{
                 type: 'custom',
                 animated: false,
