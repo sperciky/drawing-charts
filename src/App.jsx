@@ -210,6 +210,8 @@ function App() {
   // Reverse edge direction (swap source and target)
   const handleReverseEdge = useCallback(
     (edgeId) => {
+      let reversedEdge = null;
+
       setEdges((eds) =>
         eds.map((e) => {
           if (e.id !== edgeId) return e;
@@ -235,11 +237,17 @@ function App() {
             };
           }
 
+          reversedEdge = reversed;
           return reversed;
         })
       );
+
+      // Update selectedEdge to show the new edge data in EdgeEditor
+      if (reversedEdge && selectedEdge?.id === edgeId) {
+        setSelectedEdge(reversedEdge);
+      }
     },
-    [setEdges]
+    [setEdges, selectedEdge]
   );
 
   // Handle edge reconnection (drag and drop edge endpoint)
