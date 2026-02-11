@@ -2,18 +2,23 @@ import React, { useState, useEffect } from 'react';
 import Button from '../ui/Button';
 import Input from '../ui/Input';
 import Dropdown from '../ui/Dropdown';
-import { X, Trash2 } from 'lucide-react';
+import { X, Trash2, Plus } from 'lucide-react';
 import { EDGE_TYPES } from '../../constants/colors';
 
 const EdgeEditor = ({ edge, onUpdate, onDelete, onClose }) => {
   const [label, setLabel] = useState(edge.label || '');
   const [animated, setAnimated] = useState(edge.animated || false);
   const [edgeType, setEdgeType] = useState(edge.type || 'smoothstep');
+  const [connectionType, setConnectionType] = useState(edge.data?.connectionType || 'request');
+  const [parameters, setParameters] = useState(edge.data?.parameters || []);
+  const [newParameter, setNewParameter] = useState('');
 
   useEffect(() => {
     setLabel(edge.label || '');
     setAnimated(edge.animated || false);
     setEdgeType(edge.type || 'smoothstep');
+    setConnectionType(edge.data?.connectionType || 'request');
+    setParameters(edge.data?.parameters || []);
   }, [edge]);
 
   const handleUpdate = () => {
@@ -22,12 +27,37 @@ const EdgeEditor = ({ edge, onUpdate, onDelete, onClose }) => {
       label,
       animated,
       type: edgeType,
+      data: {
+        ...edge.data,
+        label,
+        type: edgeType,
+        connectionType,
+        parameters,
+      },
     });
   };
 
   useEffect(() => {
     handleUpdate();
-  }, [label, animated, edgeType]);
+  }, [label, animated, edgeType, connectionType, parameters]);
+
+  const handleAddParameter = () => {
+    if (newParameter.trim()) {
+      setParameters([...parameters, newParameter.trim()]);
+      setNewParameter('');
+    }
+  };
+
+  const handleRemoveParameter = (index) => {
+    setParameters(parameters.filter((_, i) => i !== index));
+  };
+
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleAddParameter();
+    }
+  };
 
   const handleDeleteEdge = () => {
     if (window.confirm('Are you sure you want to delete this connection?')) {
@@ -59,13 +89,68 @@ const EdgeEditor = ({ edge, onUpdate, onDelete, onClose }) => {
           placeholder="e.g., HTTP/REST, SQL Query"
         />
 
+        {/* Connection Direction Type */}
+        <Dropdown
+          label="Direction Type"
+          options={[
+            { label: '→ Request', value: 'request' },
+            { label: '← Response', value: 'response' },
+          ]}
+          value={connectionType}
+          onChange={setConnectionType}
+        />
+
         {/* Edge Type */}
         <Dropdown
-          label="Connection Type"
+          label="Connection Style"
           options={EDGE_TYPES.map((type) => ({ label: type.name, value: type.value }))}
           value={edgeType}
           onChange={setEdgeType}
         />
+
+        {/* Parameters */}
+        <div className="space-y-2">
+          <label className="text-sm font-medium text-gray-700">Parameters Delivered</label>
+
+          {/* Add Parameter Input */}
+          <div className="flex gap-2">
+            <Input
+              value={newParameter}
+              onChange={(e) => setNewParameter(e.target.value)}
+              onKeyPress={handleKeyPress}
+              placeholder="e.g., userId, productId"
+              className="flex-1"
+            />
+            <Button
+              onClick={handleAddParameter}
+              variant="secondary"
+              size="sm"
+              icon={<Plus size={16} />}
+            >
+              Add
+            </Button>
+          </div>
+
+          {/* Parameters List */}
+          {parameters.length > 0 && (
+            <div className="space-y-1 mt-2">
+              {parameters.map((param, index) => (
+                <div
+                  key={index}
+                  className="flex items-center justify-between bg-gray-50 border border-gray-200 rounded px-3 py-2"
+                >
+                  <span className="text-sm font-mono text-gray-800">{param}</span>
+                  <button
+                    onClick={() => handleRemoveParameter(index)}
+                    className="text-red-500 hover:text-red-700 transition-colors"
+                  >
+                    <X size={16} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
 
         {/* Animated */}
         <div className="flex items-center justify-between">

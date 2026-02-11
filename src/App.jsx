@@ -93,9 +93,11 @@ function App() {
   // Handle connection
   const onConnect = useCallback(
     (params) => {
+      // Generate unique ID that includes timestamp to allow multiple connections
+      const timestamp = Date.now();
       const newEdge = {
         ...params,
-        id: `e${params.source}-${params.target}`,
+        id: `e${params.source}-${params.target}-${timestamp}`,
         type: 'custom',
         animated: false,
         label: '',
@@ -107,6 +109,8 @@ function App() {
         data: {
           label: '',
           type: 'smoothstep',
+          connectionType: 'request', // Default to request
+          parameters: [], // Array of parameter names
         },
       };
       setEdges((eds) => addEdge(newEdge, eds));
