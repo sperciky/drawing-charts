@@ -198,7 +198,7 @@ const CustomEdge = ({
           }}
         />
 
-        {/* Reconnection handles for bidirectional edges */}
+        {/* Reconnection handles for bidirectional edges - visual indicators only */}
         {selected && (
           <>
             {/* Source handle */}
@@ -207,15 +207,15 @@ const CustomEdge = ({
                 style={{
                   position: 'absolute',
                   transform: `translate(-50%, -50%) translate(${sourceX}px,${sourceY}px)`,
-                  pointerEvents: 'all',
+                  pointerEvents: 'none',
                   zIndex: 1000,
                 }}
               >
                 <div
-                  className="w-6 h-6 rounded-full bg-purple-500 border-[3px] border-white shadow-lg cursor-grab hover:scale-125 active:cursor-grabbing active:scale-110 transition-all duration-150"
-                  title="Drag to reconnect source"
+                  className="w-10 h-10 rounded-full bg-purple-500 border-[4px] border-white shadow-lg animate-pulse"
                   style={{
-                    boxShadow: '0 0 0 2px rgba(168, 85, 247, 0.6), 0 4px 12px -2px rgba(0, 0, 0, 0.3)',
+                    boxShadow: '0 0 0 3px rgba(168, 85, 247, 0.6), 0 4px 12px -2px rgba(0, 0, 0, 0.3)',
+                    opacity: 0.9,
                   }}
                 />
               </div>
@@ -227,15 +227,15 @@ const CustomEdge = ({
                 style={{
                   position: 'absolute',
                   transform: `translate(-50%, -50%) translate(${targetX}px,${targetY}px)`,
-                  pointerEvents: 'all',
+                  pointerEvents: 'none',
                   zIndex: 1000,
                 }}
               >
                 <div
-                  className="w-6 h-6 rounded-full bg-blue-500 border-[3px] border-white shadow-lg cursor-grab hover:scale-125 active:cursor-grabbing active:scale-110 transition-all duration-150"
-                  title="Drag to reconnect target"
+                  className="w-10 h-10 rounded-full bg-blue-500 border-[4px] border-white shadow-lg animate-pulse"
                   style={{
-                    boxShadow: '0 0 0 2px rgba(59, 130, 246, 0.6), 0 4px 12px -2px rgba(0, 0, 0, 0.3)',
+                    boxShadow: '0 0 0 3px rgba(59, 130, 246, 0.6), 0 4px 12px -2px rgba(0, 0, 0, 0.3)',
+                    opacity: 0.9,
                   }}
                 />
               </div>
@@ -347,21 +347,21 @@ const CustomEdge = ({
 
     return (
       <>
-        {/* Target handle - draggable endpoint indicator */}
+        {/* Target handle - visual indicator only, doesn't block pointer events */}
         <EdgeLabelRenderer>
           <div
             style={{
               position: 'absolute',
               transform: `translate(-50%, -50%) translate(${targetX}px,${targetY}px)`,
-              pointerEvents: 'all',
+              pointerEvents: 'none',
               zIndex: 1000,
             }}
           >
             <div
-              className="w-6 h-6 rounded-full bg-blue-500 border-[3px] border-white shadow-lg cursor-grab hover:scale-125 active:cursor-grabbing active:scale-110 transition-all duration-150"
-              title="Drag to reconnect to different node"
+              className="w-10 h-10 rounded-full bg-blue-500 border-[4px] border-white shadow-lg animate-pulse"
               style={{
-                boxShadow: '0 0 0 2px rgba(59, 130, 246, 0.6), 0 4px 12px -2px rgba(0, 0, 0, 0.3)',
+                boxShadow: '0 0 0 3px rgba(59, 130, 246, 0.6), 0 4px 12px -2px rgba(0, 0, 0, 0.3)',
+                opacity: 0.9,
               }}
             />
           </div>
