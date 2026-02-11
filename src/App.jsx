@@ -197,14 +197,22 @@ function App() {
   // Helper to convert handle type when reversing
   // Converts "left-source" to "left-target" and vice versa
   const convertHandleType = (handleId) => {
-    if (!handleId) return handleId;
+    if (!handleId) {
+      console.log('⚠️ convertHandleType: handleId is null/undefined');
+      return handleId;
+    }
+
+    let result;
     if (handleId.endsWith('-source')) {
-      return handleId.replace('-source', '-target');
+      result = handleId.replace('-source', '-target');
+    } else if (handleId.endsWith('-target')) {
+      result = handleId.replace('-target', '-source');
+    } else {
+      result = handleId;
     }
-    if (handleId.endsWith('-target')) {
-      return handleId.replace('-target', '-source');
-    }
-    return handleId;
+
+    console.log(`🔄 convertHandleType: "${handleId}" → "${result}"`);
+    return result;
   };
 
   // Reverse edge direction (swap source and target)
@@ -216,6 +224,27 @@ function App() {
         eds.map((e) => {
           if (e.id !== edgeId) return e;
 
+          console.log('🔄 Reversing edge:', {
+            oldSource: e.source,
+            oldTarget: e.target,
+            oldSourceHandle: e.sourceHandle,
+            oldTargetHandle: e.targetHandle,
+          });
+
+          // When reversing an edge, we need to:
+          // 1. Swap source and target nodes
+          // 2. The new sourceHandle should use the position from the old targetHandle but with type=source
+          // 3. The new targetHandle should use the position from the old sourceHandle but with type=target
+          const newSourceHandle = convertHandleType(e.targetHandle);
+          const newTargetHandle = convertHandleType(e.sourceHandle);
+
+          console.log('🔄 New handles:', {
+            newSource: e.target,
+            newTarget: e.source,
+            newSourceHandle,
+            newTargetHandle,
+          });
+
           // Create reversed edge with only the properties we explicitly want to keep
           // This avoids carrying over internal ReactFlow properties that might become invalid
           const reversed = {
@@ -223,8 +252,8 @@ function App() {
             type: e.type,
             source: e.target,
             target: e.source,
-            sourceHandle: convertHandleType(e.targetHandle),
-            targetHandle: convertHandleType(e.sourceHandle),
+            sourceHandle: newSourceHandle,
+            targetHandle: newTargetHandle,
             animated: e.animated,
             label: e.label,
             style: e.style,
@@ -242,6 +271,8 @@ function App() {
             requestParameters: e.data?.responseParameters || [],
             responseParameters: e.data?.requestParameters || [],
           };
+
+          console.log('✅ Reversed edge created:', reversed);
 
           reversedEdge = reversed;
           return reversed;
