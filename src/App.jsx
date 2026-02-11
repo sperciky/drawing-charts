@@ -134,6 +134,7 @@ function App() {
         type: 'custom',
         animated: false,
         label: '',
+        reconnectable: 'target', // For unidirectional edges, only target end is reconnectable
         markerEnd: {
           type: MarkerType.ArrowClosed,
           width: 20,
@@ -204,15 +205,20 @@ function App() {
   const handleUpdateEdge = useCallback(
     (edgeId, updatedEdge) => {
       setEdges((eds) =>
-        eds.map((e) =>
-          e.id === edgeId
-            ? {
-                ...e,
-                ...updatedEdge,
-                data: { ...e.data, ...updatedEdge.data },
-              }
-            : e
-        )
+        eds.map((e) => {
+          if (e.id === edgeId) {
+            const updated = {
+              ...e,
+              ...updatedEdge,
+              data: { ...e.data, ...updatedEdge.data },
+            };
+            // Set reconnectable based on direction type
+            const directionType = updated.data?.directionType || 'unidirectional';
+            updated.reconnectable = directionType === 'unidirectional' ? 'target' : true;
+            return updated;
+          }
+          return e;
+        })
       );
     },
     [setEdges]
@@ -271,6 +277,7 @@ function App() {
 
           // Create reversed edge with only the properties we explicitly want to keep
           // This avoids carrying over internal ReactFlow properties that might become invalid
+          const directionType = e.data?.directionType || 'unidirectional';
           const reversed = {
             id: e.id,
             type: e.type,
@@ -281,6 +288,7 @@ function App() {
             animated: e.animated,
             label: e.label,
             style: e.style,
+            reconnectable: directionType === 'unidirectional' ? 'target' : true,
             markerEnd: e.markerEnd,
             markerStart: e.markerStart,
             data: { ...e.data },
