@@ -176,7 +176,7 @@ function App() {
             ? {
                 ...e,
                 ...updatedEdge,
-                data: { ...e.data, label: updatedEdge.label, type: updatedEdge.type },
+                data: { ...e.data, ...updatedEdge.data },
               }
             : e
         )

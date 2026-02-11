@@ -23,7 +23,8 @@ const EdgeEditor = ({ edge, onUpdate, onDelete, onClose }) => {
     setParameters(edge.data?.parameters || []);
   }, [edge]);
 
-  const handleUpdate = () => {
+  // Update edge whenever any field changes
+  useEffect(() => {
     onUpdate(edge.id, {
       ...edge,
       label,
@@ -38,11 +39,7 @@ const EdgeEditor = ({ edge, onUpdate, onDelete, onClose }) => {
         parameters,
       },
     });
-  };
-
-  useEffect(() => {
-    handleUpdate();
-  }, [label, animated, edgeType, directionType, connectionType, parameters]);
+  }, [edge.id, label, animated, edgeType, directionType, connectionType, parameters, onUpdate]);
 
   const handleAddParameter = () => {
     if (newParameter.trim()) {
