@@ -134,43 +134,61 @@ function App() {
         return;
       }
 
-      // Find the other node to determine handle positions
-      const otherNodeId = endpoint === 'source' ? targetEdge.target : targetEdge.source;
-      const otherNode = nodes.find(n => n.id === otherNodeId);
+      // Use ReactFlow instance to convert screen coordinates to flow coordinates
+      let side;
 
-      console.log('📍 Other node:', otherNodeId, otherNode?.data.name);
-      console.log('📍 Clicked node position:', clickedNode.position);
-      console.log('📍 Other node position:', otherNode?.position);
+      if (reactFlowInstance) {
+        // Get the click position in flow coordinates
+        const reactFlowBounds = reactFlowWrapper.current?.getBoundingClientRect();
+        if (reactFlowBounds) {
+          const clickPosX = event.clientX - reactFlowBounds.left;
+          const clickPosY = event.clientY - reactFlowBounds.top;
 
-      // Calculate which side to connect to based on relative positions
-      // This considers all 4 directions: top, right, bottom, left
-      let newHandle;
-      if (otherNode) {
-        const dx = otherNode.position.x - clickedNode.position.x;
-        const dy = otherNode.position.y - clickedNode.position.y;
+          // Convert to flow position
+          const flowPosition = reactFlowInstance.screenToFlowPosition({
+            x: clickPosX,
+            y: clickPosY,
+          });
 
-        // Determine the primary direction based on which delta is larger
-        const absX = Math.abs(dx);
-        const absY = Math.abs(dy);
+          console.log(`🖱️ Click screen: (${clickPosX}, ${clickPosY}), flow: (${flowPosition.x}, ${flowPosition.y})`);
+          console.log(`📍 Node position: (${clickedNode.position.x}, ${clickedNode.position.y})`);
 
-        let side;
-        if (absX > absY) {
-          // Horizontal connection is stronger
-          side = dx > 0 ? 'right' : 'left';
+          // Calculate relative click position within the node
+          // Node dimensions from PlatformNode: min-width 250px, min-height 150px
+          const nodeWidth = 250;
+          const nodeHeight = 150;
+
+          const relativeX = (flowPosition.x - clickedNode.position.x) / nodeWidth;
+          const relativeY = (flowPosition.y - clickedNode.position.y) / nodeHeight;
+
+          console.log(`📐 Relative position: (${relativeX.toFixed(2)}, ${relativeY.toFixed(2)})`);
+
+          // Determine which quadrant: divide node into 4 triangular regions
+          const centerX = 0.5;
+          const centerY = 0.5;
+          const dx = relativeX - centerX;
+          const dy = relativeY - centerY;
+
+          // Use diagonal lines to divide the node into 4 regions
+          if (Math.abs(dx) > Math.abs(dy)) {
+            side = dx > 0 ? 'right' : 'left';
+          } else {
+            side = dy > 0 ? 'bottom' : 'top';
+          }
         } else {
-          // Vertical connection is stronger
-          side = dy > 0 ? 'bottom' : 'top';
+          // Fallback if can't get bounds
+          side = 'right';
         }
-
-        // Construct handle name based on endpoint type
-        const handleType = endpoint === 'source' ? '-source' : '-target';
-        newHandle = side + handleType;
-
-        console.log(`📐 Direction: dx=${dx}, dy=${dy}, side=${side}, handle=${newHandle}`);
       } else {
-        // Fallback to right/left if other node not found
-        newHandle = endpoint === 'source' ? 'right-source' : 'left-target';
+        // Fallback if ReactFlow instance not available
+        side = 'right';
       }
+
+      // Construct handle name based on endpoint type
+      const handleType = endpoint === 'source' ? '-source' : '-target';
+      const newHandle = side + handleType;
+
+      console.log(`📍 Detected side: ${side}, handle: ${newHandle}`);
 
       if (endpoint === 'source') {
         console.log(`✅ Setting source: ${clickedNode.id}, handle: ${newHandle}`);
@@ -193,13 +211,13 @@ function App() {
       }
 
       setReconnectMode(null);
-      console.log(`✅ Edge ${edgeId} reconnected: ${endpoint} → ${clickedNode.id} (${clickedNode.data.name})`);
+      console.log(`✅ Edge ${edgeId} reconnected: ${endpoint} → ${clickedNode.id} (${clickedNode.data.name}) at ${side}`);
       return;
     }
 
     setSelectedNode(clickedNode);
     setSelectedEdge(null);
-  }, [reconnectMode, setEdges, nodes, edges]);
+  }, [reconnectMode, setEdges, nodes, edges, reactFlowWrapper]);
 
   // Handle edge click
   const onEdgeClick = useCallback((event, edge) => {
