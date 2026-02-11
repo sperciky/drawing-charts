@@ -91,9 +91,9 @@ const CustomEdge = ({
   if (directionType === 'bidirectional') {
     debugLog('✅ BIDIRECTIONAL MODE ACTIVE for edge:', id);
 
-    // Calculate offsets for parallel lines
-    const requestOffset = calculateOffset(35); // 35px offset upward
-    const responseOffset = calculateOffset(-35); // 35px offset downward
+    // Calculate offsets for parallel lines (reduced from 35 to 15 for tighter spacing)
+    const requestOffset = calculateOffset(15); // 15px offset upward
+    const responseOffset = calculateOffset(-15); // 15px offset downward
 
     // Request line (blue, solid, arrow pointing FROM source TO target)
     const [requestPath, requestLabelX, requestLabelY] = getPath(
@@ -129,11 +129,11 @@ const CustomEdge = ({
         };
       }
 
-      // Both have parameters - check for collision
+      // Both have parameters - check for collision (reduced force for tighter positioning)
       return adjustTwoLabels(
         { x: requestLabelX, y: requestLabelY, width: 140, height: 70 },
         { x: responseLabelX, y: responseLabelY, width: 140, height: 70 },
-        { minDistance: 100, iterations: 120 }
+        { minDistance: 40, iterations: 30 }  // Reduced from 100/120 to 40/30
       );
     }, [requestLabelX, requestLabelY, responseLabelX, responseLabelY, requestParameters.length, responseParameters.length]);
 
