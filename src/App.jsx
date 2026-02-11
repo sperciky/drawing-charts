@@ -50,13 +50,18 @@ function App() {
   const [reactFlowInstance, setReactFlowInstance] = useState(null);
   const [debugModeState, setDebugModeState] = useState(false);
   const [showMiniMap, setShowMiniMap] = useState(true);
-  const [reconnectMode, setReconnectMode] = useState(null); // { edgeId, endpoint: 'source' | 'target' }
+  const [reconnectMode, setReconnectMode] = useState(null); // { edgeId, endpoint: 'source' | 'target', selectedHandle: 'top' | 'right' | 'bottom' | 'left' }
 
   // Reconnection mode handlers (defined early for use in other callbacks)
-  const handleStartReconnection = useCallback((edgeId, endpoint) => {
-    setReconnectMode({ edgeId, endpoint });
-    console.log(`🔄 Reconnection mode started: ${endpoint} of edge ${edgeId}`);
-    console.log('👆 Click on a node to reconnect to it');
+  const handleStartReconnection = useCallback((edgeId, endpoint, selectedHandle = null) => {
+    setReconnectMode({ edgeId, endpoint, selectedHandle });
+    if (selectedHandle) {
+      console.log(`🔄 Reconnection mode: ${endpoint} of edge ${edgeId}, handle: ${selectedHandle.toUpperCase()}`);
+      console.log('👆 Click on a node to complete reconnection');
+    } else {
+      console.log(`🔄 Reconnection mode started: ${endpoint} of edge ${edgeId}`);
+      console.log('👆 Choose a handle position first');
+    }
   }, []);
 
   const handleCancelReconnection = useCallback(() => {
@@ -133,89 +138,20 @@ function App() {
         return;
       }
 
-      // Use ReactFlow instance to convert screen coordinates to flow coordinates
-      let side;
+      // Use explicit handle selection instead of coordinate detection
+      const { selectedHandle } = reconnectMode;
 
-      if (reactFlowInstance) {
-        // Get the click position in flow coordinates
-        const reactFlowBounds = reactFlowWrapper.current?.getBoundingClientRect();
-        if (reactFlowBounds) {
-          const clickPosX = event.clientX - reactFlowBounds.left;
-          const clickPosY = event.clientY - reactFlowBounds.top;
-
-          // Convert to flow position
-          const flowPosition = reactFlowInstance.screenToFlowPosition({
-            x: clickPosX,
-            y: clickPosY,
-          });
-
-          console.log(`🖱️ Click screen: (${clickPosX}, ${clickPosY}), flow: (${flowPosition.x}, ${flowPosition.y})`);
-          console.log(`📍 Node position: (${clickedNode.position.x}, ${clickedNode.position.y})`);
-
-          // Get node dimensions in flow coordinates
-          // ReactFlow provides dimensions in screen pixels, we need flow coordinates
-          // Always convert screen pixels to flow coordinates by dividing by zoom
-          const zoom = reactFlowInstance.getZoom();
-          const nodeWidthScreen = clickedNode.width || clickedNode.measured?.width || 250;
-          const nodeHeightScreen = clickedNode.height || clickedNode.measured?.height || 150;
-          const nodeWidth = nodeWidthScreen / zoom;
-          const nodeHeight = nodeHeightScreen / zoom;
-
-          console.log(`📏 Node dimensions: screen=${nodeWidthScreen}×${nodeHeightScreen}, flow=${nodeWidth.toFixed(1)}×${nodeHeight.toFixed(1)}, zoom=${zoom.toFixed(2)}`);
-
-          // Calculate handle center positions in flow coordinates
-          const handlePositions = {
-            top: {
-              x: clickedNode.position.x + nodeWidth / 2,
-              y: clickedNode.position.y
-            },
-            right: {
-              x: clickedNode.position.x + nodeWidth,
-              y: clickedNode.position.y + nodeHeight / 2
-            },
-            bottom: {
-              x: clickedNode.position.x + nodeWidth / 2,
-              y: clickedNode.position.y + nodeHeight
-            },
-            left: {
-              x: clickedNode.position.x,
-              y: clickedNode.position.y + nodeHeight / 2
-            },
-          };
-
-          // Calculate distance from click to each handle
-          const distance = (p1, p2) => Math.sqrt(
-            Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2)
-          );
-
-          const distances = {
-            top: distance(flowPosition, handlePositions.top),
-            right: distance(flowPosition, handlePositions.right),
-            bottom: distance(flowPosition, handlePositions.bottom),
-            left: distance(flowPosition, handlePositions.left),
-          };
-
-          // Find the handle with minimum distance
-          side = Object.keys(distances).reduce((closest, current) =>
-            distances[current] < distances[closest] ? current : closest
-          );
-
-          console.log(`📏 Distances to handles:`, distances);
-          console.log(`📍 Closest handle: ${side}`);
-        } else {
-          // Fallback if can't get bounds
-          side = 'right';
-        }
-      } else {
-        // Fallback if ReactFlow instance not available
-        side = 'right';
+      // Check if user has selected a handle yet
+      if (!selectedHandle) {
+        console.log('⚠️ No handle selected yet. Please choose a handle position (Top/Right/Bottom/Left) first.');
+        return;
       }
 
       // Construct handle name based on endpoint type
       const handleType = endpoint === 'source' ? '-source' : '-target';
-      const newHandle = side + handleType;
+      const newHandle = selectedHandle + handleType;
 
-      console.log(`📍 Detected side: ${side}, handle: ${newHandle}`);
+      console.log(`✅ User selected handle: ${selectedHandle.toUpperCase()}, constructing: ${newHandle}`);
 
       if (endpoint === 'source') {
         console.log(`✅ Setting source: ${clickedNode.id}, handle: ${newHandle}`);

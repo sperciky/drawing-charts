@@ -170,14 +170,64 @@ const EdgeEditor = ({
           </div>
 
           {reconnectMode?.edgeId === edge.id ? (
-            <div className="space-y-2">
+            <div className="space-y-3">
               <div className="bg-yellow-50 border border-yellow-300 rounded px-3 py-2 text-xs text-yellow-900">
                 <p className="font-semibold">🔄 Reconnection Mode Active</p>
                 <p className="mt-1">
                   Reconnecting <strong>{reconnectMode.endpoint}</strong>.
-                  Click on any node to reconnect to it.
                 </p>
               </div>
+
+              {/* Handle Selection Buttons */}
+              <div className="space-y-2">
+                <p className="text-xs font-semibold text-gray-700">1. Choose handle position:</p>
+                <div className="grid grid-cols-2 gap-2">
+                  <Button
+                    onClick={() => onStartReconnection(edge.id, reconnectMode.endpoint, 'top')}
+                    variant={reconnectMode.selectedHandle === 'top' ? 'primary' : 'secondary'}
+                    size="sm"
+                    className="text-xs"
+                  >
+                    ⬆️ Top
+                  </Button>
+                  <Button
+                    onClick={() => onStartReconnection(edge.id, reconnectMode.endpoint, 'right')}
+                    variant={reconnectMode.selectedHandle === 'right' ? 'primary' : 'secondary'}
+                    size="sm"
+                    className="text-xs"
+                  >
+                    ➡️ Right
+                  </Button>
+                  <Button
+                    onClick={() => onStartReconnection(edge.id, reconnectMode.endpoint, 'bottom')}
+                    variant={reconnectMode.selectedHandle === 'bottom' ? 'primary' : 'secondary'}
+                    size="sm"
+                    className="text-xs"
+                  >
+                    ⬇️ Bottom
+                  </Button>
+                  <Button
+                    onClick={() => onStartReconnection(edge.id, reconnectMode.endpoint, 'left')}
+                    variant={reconnectMode.selectedHandle === 'left' ? 'primary' : 'secondary'}
+                    size="sm"
+                    className="text-xs"
+                  >
+                    ⬅️ Left
+                  </Button>
+                </div>
+
+                {reconnectMode.selectedHandle && (
+                  <div className="bg-green-50 border border-green-300 rounded px-3 py-2 text-xs text-green-900">
+                    <p className="font-semibold">
+                      ✓ Selected: <strong>{reconnectMode.selectedHandle.toUpperCase()}</strong> handle
+                    </p>
+                    <p className="mt-1">
+                      2. Now click on any node to complete the reconnection.
+                    </p>
+                  </div>
+                )}
+              </div>
+
               <Button
                 onClick={onCancelReconnection}
                 variant="secondary"
