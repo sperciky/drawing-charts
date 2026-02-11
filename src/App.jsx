@@ -109,8 +109,8 @@ function App() {
         data: {
           label: '',
           type: 'smoothstep',
-          directionType: 'unidirectional', // unidirectional, bidirectional, request-response
-          connectionType: 'request', // request or response (used for request-response pairs)
+          directionType: 'unidirectional', // unidirectional or bidirectional
+          connectionType: 'none', // none, request, or response (for color coding and offset)
           parameters: [], // Array of parameter names
         },
       };

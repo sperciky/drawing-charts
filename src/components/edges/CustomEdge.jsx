@@ -55,7 +55,28 @@ const CustomEdge = ({
       };
     }
 
-    // Default unidirectional
+    // Unidirectional - check role
+    if (connectionType === 'response') {
+      return {
+        stroke: '#10b981', // green for response
+        bg: 'bg-green-50',
+        border: 'border-green-300',
+        text: 'text-green-900',
+        selectedBorder: 'border-green-500',
+      };
+    }
+
+    if (connectionType === 'request') {
+      return {
+        stroke: '#3b82f6', // blue for request
+        bg: 'bg-blue-50',
+        border: 'border-blue-300',
+        text: 'text-blue-900',
+        selectedBorder: 'border-blue-500',
+      };
+    }
+
+    // Default gray for none
     return {
       stroke: '#6b7280', // gray
       bg: 'bg-gray-50',
@@ -69,10 +90,9 @@ const CustomEdge = ({
 
   // Calculate offset for request-response pairs
   const calculateOffset = () => {
-    if (directionType === 'request-response') {
-      const offset = connectionType === 'request' ? 15 : -15;
-      return offset;
-    }
+    // Offset for any connection marked as request or response
+    if (connectionType === 'request') return 15;
+    if (connectionType === 'response') return -15;
     return 0;
   };
 
@@ -143,10 +163,16 @@ const CustomEdge = ({
     if (directionType === 'request-response') {
       return connectionType === 'request' ? 'Request' : 'Response';
     }
-    return '';
+    // For unidirectional, show role if it exists
+    if (connectionType === 'request') return 'Request';
+    if (connectionType === 'response') return 'Response';
+    return 'Connection';
   };
 
   const displayLabel = getDisplayLabel();
+
+  // Always show the label box if we have a label OR parameters
+  const shouldShowLabel = displayLabel || parameters.length > 0;
 
   // Determine marker configuration
   const getMarkers = () => {
@@ -172,7 +198,7 @@ const CustomEdge = ({
   const markers = getMarkers();
 
   // Calculate label offset for request-response pairs
-  const labelOffset = directionType === 'request-response' ? offset : 0;
+  const labelOffset = (connectionType === 'request' || connectionType === 'response') ? offset : 0;
 
   return (
     <>
@@ -184,13 +210,10 @@ const CustomEdge = ({
           ...style,
           strokeWidth: selected ? 3 : 2,
           stroke: colors.stroke,
-          strokeDasharray:
-            directionType === 'request-response' && connectionType === 'response'
-              ? '5,5'
-              : undefined,
+          strokeDasharray: connectionType === 'response' ? '5,5' : undefined,
         }}
       />
-      {displayLabel && (
+      {shouldShowLabel && (
         <EdgeLabelRenderer>
           <div
             style={{
@@ -206,21 +229,29 @@ const CustomEdge = ({
               } rounded-lg shadow-md text-xs font-medium ${colors.text}`}
             >
               {/* Connection Type Label */}
-              <div className="flex items-center gap-1 font-semibold mb-1">
-                {directionType === 'request-response' && (
-                  <span className="text-base">
-                    {connectionType === 'request' ? '→' : '←'}
-                  </span>
-                )}
-                {directionType === 'bidirectional' && (
-                  <span className="text-base">↔</span>
-                )}
-                <span>{displayLabel}</span>
-              </div>
+              {displayLabel && (
+                <div className="flex items-center gap-1 font-semibold mb-1">
+                  {directionType === 'request-response' && (
+                    <span className="text-base">
+                      {connectionType === 'request' ? '→' : '←'}
+                    </span>
+                  )}
+                  {directionType === 'bidirectional' && (
+                    <span className="text-base">↔</span>
+                  )}
+                  {connectionType === 'request' && directionType === 'unidirectional' && (
+                    <span className="text-base">→</span>
+                  )}
+                  {connectionType === 'response' && directionType === 'unidirectional' && (
+                    <span className="text-base">←</span>
+                  )}
+                  <span>{displayLabel}</span>
+                </div>
+              )}
 
               {/* Parameters */}
-              {parametersText && (
-                <div className="mt-1.5 pt-1.5 border-t border-current border-opacity-20">
+              {parameters.length > 0 && (
+                <div className={displayLabel ? "mt-1.5 pt-1.5 border-t border-current border-opacity-20" : ""}>
                   <div className="text-[10px] opacity-60 mb-0.5 uppercase tracking-wide">
                     Parameters
                   </div>
