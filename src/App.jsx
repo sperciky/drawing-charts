@@ -174,7 +174,7 @@ function App() {
       }
 
       setReconnectMode(null);
-      console.log(`✅ Edge ${edgeId} reconnected: ${endpoint} → ${clickedNode.id} (${clickedNode.data.name}) at ${side}`);
+      console.log(`✅ Edge ${edgeId} reconnected: ${endpoint} → ${clickedNode.id} (${clickedNode.data.name}) at ${selectedHandle.toUpperCase()}`);
       return;
     }
 
