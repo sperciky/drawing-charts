@@ -307,23 +307,29 @@ function App() {
     [nodes, edges, exportImage, exportFile]
   );
 
-  // Setup Electron menu listeners
+  // Setup Electron menu listeners (only once on mount)
+  const handlersRef = useRef({
+    handleNew,
+    handleOpen,
+    handleSave,
+    handleUndo,
+    handleRedo,
+    handleExport,
+    handleAutoLayout,
+    saveFileAs,
+  });
+
+  // Update refs when handlers change
   useEffect(() => {
-    if (!electronAPI.isAvailable()) return;
-
-    const cleanups = [
-      electronAPI.onMenuNew(handleNew),
-      electronAPI.onMenuOpen(handleOpen),
-      electronAPI.onMenuSave(handleSave),
-      electronAPI.onMenuSaveAs(() => saveFileAs(nodes, edges)),
-      electronAPI.onMenuUndo(handleUndo),
-      electronAPI.onMenuRedo(handleRedo),
-      electronAPI.onMenuExport((event, format) => handleExport(format)),
-      electronAPI.onMenuAutoLayout(() => handleAutoLayout('TB')),
-    ];
-
-    return () => {
-      cleanups.forEach((cleanup) => cleanup());
+    handlersRef.current = {
+      handleNew,
+      handleOpen,
+      handleSave,
+      handleUndo,
+      handleRedo,
+      handleExport,
+      handleAutoLayout,
+      saveFileAs,
     };
   }, [
     handleNew,
@@ -333,9 +339,28 @@ function App() {
     handleRedo,
     handleExport,
     handleAutoLayout,
-    nodes,
-    edges,
+    saveFileAs,
   ]);
+
+  // Register listeners only once
+  useEffect(() => {
+    if (!electronAPI.isAvailable()) return;
+
+    const cleanups = [
+      electronAPI.onMenuNew(() => handlersRef.current.handleNew()),
+      electronAPI.onMenuOpen(() => handlersRef.current.handleOpen()),
+      electronAPI.onMenuSave(() => handlersRef.current.handleSave()),
+      electronAPI.onMenuSaveAs(() => handlersRef.current.saveFileAs(nodes, edges)),
+      electronAPI.onMenuUndo(() => handlersRef.current.handleUndo()),
+      electronAPI.onMenuRedo(() => handlersRef.current.handleRedo()),
+      electronAPI.onMenuExport((event, format) => handlersRef.current.handleExport(format)),
+      electronAPI.onMenuAutoLayout(() => handlersRef.current.handleAutoLayout('TB')),
+    ];
+
+    return () => {
+      cleanups.forEach((cleanup) => cleanup());
+    };
+  }, []); // Empty dependency array - only runs once
 
   return (
     <div className="flex flex-col h-screen w-screen bg-gray-50">
