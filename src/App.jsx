@@ -76,6 +76,30 @@ function App() {
   } = useFileOperations();
   const { exportImage } = useExport(reactFlowRef);
 
+  // Fix any broken edges on mount (edges with invalid handle types)
+  useEffect(() => {
+    // Check for edges with invalid handle configurations
+    const brokenEdges = edges.filter((edge) => {
+      // An edge is broken if:
+      // - sourceHandle ends with '-target' (should be '-source')
+      // - targetHandle ends with '-source' (should be '-target')
+      const hasInvalidSourceHandle = edge.sourceHandle?.endsWith('-target');
+      const hasInvalidTargetHandle = edge.targetHandle?.endsWith('-source');
+      return hasInvalidSourceHandle || hasInvalidTargetHandle;
+    });
+
+    if (brokenEdges.length > 0) {
+      console.warn('⚠️ Found broken edges with invalid handles:', brokenEdges);
+      console.warn('⚠️ Removing broken edges...');
+
+      // Remove broken edges
+      const brokenEdgeIds = brokenEdges.map((e) => e.id);
+      setEdges((eds) => eds.filter((e) => !brokenEdgeIds.includes(e.id)));
+
+      console.log('✅ Broken edges removed. You may need to recreate these connections.');
+    }
+  }, []); // Run only once on mount
+
   // Save state to history on changes
   useEffect(() => {
     pushState({ nodes, edges });
