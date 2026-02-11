@@ -58,15 +58,15 @@ const CustomEdge = ({
   };
 
   // Helper to get path based on type
-  const getPath = (srcX, srcY, tgtX, tgtY) => {
+  const getPath = (srcX, srcY, tgtX, tgtY, srcPos, tgtPos) => {
     if (type === 'smoothstep') {
       return getSmoothStepPath({
         sourceX: srcX,
         sourceY: srcY,
-        sourcePosition,
+        sourcePosition: srcPos,
         targetX: tgtX,
         targetY: tgtY,
-        targetPosition,
+        targetPosition: tgtPos,
       });
     } else if (type === 'straight') {
       return getStraightPath({
@@ -79,10 +79,10 @@ const CustomEdge = ({
       return getBezierPath({
         sourceX: srcX,
         sourceY: srcY,
-        sourcePosition,
+        sourcePosition: srcPos,
         targetX: tgtX,
         targetY: tgtY,
-        targetPosition,
+        targetPosition: tgtPos,
       });
     }
   };
@@ -100,16 +100,21 @@ const CustomEdge = ({
       sourceX + requestOffset.x,
       sourceY + requestOffset.y,
       targetX + requestOffset.x,
-      targetY + requestOffset.y
+      targetY + requestOffset.y,
+      sourcePosition,
+      targetPosition
     );
 
     // Response line (green, dashed, arrow pointing FROM target TO source)
     // Draw in reverse direction so markerEnd points from target to source
+    // IMPORTANT: Swap positions because we're drawing in reverse!
     const [responsePath, responseLabelX, responseLabelY] = getPath(
       targetX + responseOffset.x,
       targetY + responseOffset.y,
       sourceX + responseOffset.x,
-      sourceY + responseOffset.y
+      sourceY + responseOffset.y,
+      targetPosition,  // Use target position as source (reversed!)
+      sourcePosition   // Use source position as target (reversed!)
     );
 
     debugLog('📍 Label Positions:', {
@@ -279,7 +284,7 @@ const CustomEdge = ({
   }
 
   // UNIDIRECTIONAL: Single line with one arrow, but can still show parameter boxes
-  const [edgePath, labelX, labelY] = getPath(sourceX, sourceY, targetX, targetY);
+  const [edgePath, labelX, labelY] = getPath(sourceX, sourceY, targetX, targetY, sourcePosition, targetPosition);
 
   const marker = {
     type: MarkerType.ArrowClosed,
