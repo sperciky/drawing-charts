@@ -6,7 +6,7 @@ import ReactFlow, {
   useNodesState,
   useEdgesState,
   addEdge,
-  updateEdge,
+  reconnectEdge,
   MarkerType,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
@@ -311,12 +311,62 @@ function App() {
     [setEdges, selectedEdge]
   );
 
+  // Validate connections to ensure proper handle types
+  const isValidConnection = useCallback((connection) => {
+    // Must have both source and target
+    if (!connection.source || !connection.target) {
+      console.log('❌ Invalid connection: missing source or target');
+      return false;
+    }
+
+    // Check handle types
+    const sourceHandle = connection.sourceHandle || '';
+    const targetHandle = connection.targetHandle || '';
+
+    // Source handle must be a "source" type, target handle must be a "target" type
+    const sourceIsValid = sourceHandle.endsWith('-source');
+    const targetIsValid = targetHandle.endsWith('-target');
+
+    if (!sourceIsValid || !targetIsValid) {
+      console.log('❌ Invalid connection: wrong handle types', {
+        sourceHandle,
+        targetHandle,
+        sourceIsValid,
+        targetIsValid,
+      });
+      return false;
+    }
+
+    console.log('✅ Valid connection:', {
+      source: connection.source,
+      target: connection.target,
+      sourceHandle,
+      targetHandle,
+    });
+
+    return true;
+  }, []);
+
   // Handle edge reconnection (drag and drop edge endpoint)
   const onEdgeUpdate = useCallback(
     (oldEdge, newConnection) => {
-      setEdges((els) => updateEdge(oldEdge, newConnection, els));
+      // Validate the new connection
+      if (!isValidConnection(newConnection)) {
+        console.error('❌ Edge reconnection blocked: invalid connection');
+        return;
+      }
+
+      console.log('✅ Edge reconnection valid:', {
+        oldEdge: oldEdge.id,
+        newSource: newConnection.source,
+        newTarget: newConnection.target,
+        sourceHandle: newConnection.sourceHandle,
+        targetHandle: newConnection.targetHandle,
+      });
+
+      setEdges((els) => reconnectEdge(oldEdge, newConnection, els));
     },
-    [setEdges]
+    [setEdges, isValidConnection]
   );
 
   // Delete edge
@@ -565,7 +615,7 @@ function App() {
               snapGrid={[15, 15]}
               connectionMode="loose"
               connectionRadius={30}
-              isValidConnection={() => true}
+              isValidConnection={isValidConnection}
               defaultEdgeOptions={{
                 type: 'custom',
                 animated: false,
