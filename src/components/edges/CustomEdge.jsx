@@ -27,6 +27,17 @@ const CustomEdge = ({
     responseParameters = []
   } = data || {};
 
+  // DEBUG LOGGING
+  console.log('🔍 CustomEdge Render:', {
+    edgeId: id,
+    directionType,
+    requestParameters,
+    responseParameters,
+    requestLabel,
+    responseLabel,
+    fullData: data,
+  });
+
   // Calculate perpendicular offset for parallel lines
   const calculateOffset = (offsetAmount) => {
     const dx = targetX - sourceX;
@@ -77,6 +88,8 @@ const CustomEdge = ({
 
   // BIDIRECTIONAL: Render two separate parallel lines
   if (directionType === 'bidirectional') {
+    console.log('✅ BIDIRECTIONAL MODE ACTIVE for edge:', id);
+
     // Calculate offsets for parallel lines
     const requestOffset = calculateOffset(35); // 35px offset upward
     const responseOffset = calculateOffset(-35); // 35px offset downward
@@ -96,6 +109,13 @@ const CustomEdge = ({
       targetX + responseOffset.x,
       targetY + responseOffset.y
     );
+
+    console.log('📍 Label Positions:', {
+      requestLabelX,
+      requestLabelY,
+      responseLabelX,
+      responseLabelY,
+    });
 
     // Apply D3-force collision detection to prevent label overlap
     const adjustedPositions = useMemo(() => {
@@ -120,6 +140,16 @@ const CustomEdge = ({
     const finalResponseX = adjustedPositions.label2.x;
     const finalResponseY = adjustedPositions.label2.y;
 
+    console.log('🎯 Final Adjusted Positions:', {
+      finalRequestX,
+      finalRequestY,
+      finalResponseX,
+      finalResponseY,
+    });
+
+    console.log('📦 Will Render Request Box?', requestParameters.length > 0);
+    console.log('📦 Will Render Response Box?', responseParameters.length > 0);
+
     const requestMarker = {
       type: MarkerType.ArrowClosed,
       width: 20,
@@ -133,6 +163,8 @@ const CustomEdge = ({
       height: 20,
       color: '#10b981', // green
     };
+
+    console.log('🚀 About to render bidirectional components');
 
     return (
       <>
