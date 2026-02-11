@@ -119,13 +119,16 @@ const EdgeEditor = ({ edge, onUpdate, onDelete, onClose }) => {
           placeholder="e.g., HTTP/REST, SQL Query"
         />
 
-        {/* Direction Type - Hidden, always bidirectional now */}
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-sm">
-          <p className="font-medium text-blue-900 mb-1">💡 Connection Mode</p>
-          <p className="text-blue-700 text-xs">
-            This connection will display as <strong>two separate lines</strong>: one for the request and one for the response, each with its own parameters.
-          </p>
-        </div>
+        {/* Direction Type */}
+        <Dropdown
+          label="Flow Direction"
+          options={[
+            { label: '→ Unidirectional (Single Line)', value: 'unidirectional' },
+            { label: '↔ Bidirectional (Two Lines)', value: 'bidirectional' },
+          ]}
+          value={directionType}
+          onChange={setDirectionType}
+        />
 
         {/* Edge Type */}
         <Dropdown

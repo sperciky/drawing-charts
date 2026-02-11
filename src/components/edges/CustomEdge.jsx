@@ -19,7 +19,7 @@ const CustomEdge = ({
   const {
     label = '',
     type = 'smoothstep',
-    directionType = 'bidirectional',
+    directionType = 'unidirectional',
     requestLabel = 'request',
     responseLabel = 'response',
     requestParameters = [],
@@ -74,11 +74,11 @@ const CustomEdge = ({
     }
   };
 
-  // For bidirectional connections, render two separate lines
+  // BIDIRECTIONAL: Render two separate parallel lines
   if (directionType === 'bidirectional') {
     // Calculate offsets for parallel lines
-    const requestOffset = calculateOffset(12); // 12px offset upward
-    const responseOffset = calculateOffset(-12); // 12px offset downward
+    const requestOffset = calculateOffset(15); // 15px offset upward
+    const responseOffset = calculateOffset(-15); // 15px offset downward
 
     // Request line (blue, solid, arrow pointing to target)
     const [requestPath, requestLabelX, requestLabelY] = getPath(
@@ -112,7 +112,7 @@ const CustomEdge = ({
 
     return (
       <>
-        {/* Request Line */}
+        {/* Request Line - Blue, Solid, Arrow to Target */}
         <BaseEdge
           path={requestPath}
           markerEnd={requestMarker}
@@ -123,7 +123,7 @@ const CustomEdge = ({
           }}
         />
 
-        {/* Response Line */}
+        {/* Response Line - Green, Dashed, Arrow to Source */}
         <BaseEdge
           path={responsePath}
           markerStart={responseMarker}
@@ -135,7 +135,7 @@ const CustomEdge = ({
           }}
         />
 
-        {/* Request Parameters Box */}
+        {/* Request Parameters Box - Always show if we have parameters */}
         {requestParameters.length > 0 && (
           <EdgeLabelRenderer>
             <div
@@ -176,7 +176,7 @@ const CustomEdge = ({
           </EdgeLabelRenderer>
         )}
 
-        {/* Response Parameters Box */}
+        {/* Response Parameters Box - Always show if we have parameters */}
         {responseParameters.length > 0 && (
           <EdgeLabelRenderer>
             <div
@@ -220,7 +220,7 @@ const CustomEdge = ({
     );
   }
 
-  // For legacy single-line connections (backward compatibility)
+  // UNIDIRECTIONAL: Single line with one arrow, but can still show parameter boxes
   const [edgePath, labelX, labelY] = getPath(sourceX, sourceY, targetX, targetY);
 
   const marker = {
@@ -229,6 +229,9 @@ const CustomEdge = ({
     height: 20,
     color: '#6b7280',
   };
+
+  const hasParameters = requestParameters.length > 0 || responseParameters.length > 0;
+  const showLabel = label || !hasParameters;
 
   return (
     <>
@@ -241,7 +244,9 @@ const CustomEdge = ({
           stroke: '#6b7280',
         }}
       />
-      {label && (
+
+      {/* Show label if provided OR if no parameters */}
+      {showLabel && label && (
         <EdgeLabelRenderer>
           <div
             style={{
@@ -257,6 +262,81 @@ const CustomEdge = ({
               } rounded-lg shadow-md text-xs font-medium text-gray-900`}
             >
               <span>{label}</span>
+            </div>
+          </div>
+        </EdgeLabelRenderer>
+      )}
+
+      {/* Show parameter boxes for unidirectional too */}
+      {requestParameters.length > 0 && (
+        <EdgeLabelRenderer>
+          <div
+            style={{
+              position: 'absolute',
+              transform: `translate(-50%, -50%) translate(${labelX}px,${labelY - 30}px)`,
+              pointerEvents: 'all',
+            }}
+            className="nodrag nopan"
+          >
+            <div
+              className={`px-3 py-2 bg-blue-50 border-2 ${
+                selected ? 'border-blue-500' : 'border-blue-300'
+              } rounded-lg shadow-md text-xs font-medium text-blue-900`}
+            >
+              <div className="flex items-center gap-1 font-semibold mb-1">
+                <span className="text-base">→</span>
+                <span>{requestLabel}</span>
+              </div>
+              <div className="mt-1.5 pt-1.5 border-t border-current border-opacity-20">
+                <div className="text-[10px] opacity-60 mb-0.5 uppercase tracking-wide">
+                  Parameters
+                </div>
+                <div className="font-mono text-xs opacity-90 leading-relaxed">
+                  {requestParameters.map((param, idx) => (
+                    <div key={idx} className="flex items-center gap-1">
+                      <span className="opacity-50">•</span>
+                      <span className="font-semibold">{param}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </EdgeLabelRenderer>
+      )}
+
+      {responseParameters.length > 0 && (
+        <EdgeLabelRenderer>
+          <div
+            style={{
+              position: 'absolute',
+              transform: `translate(-50%, -50%) translate(${labelX}px,${labelY + 30}px)`,
+              pointerEvents: 'all',
+            }}
+            className="nodrag nopan"
+          >
+            <div
+              className={`px-3 py-2 bg-green-50 border-2 ${
+                selected ? 'border-green-500' : 'border-green-300'
+              } rounded-lg shadow-md text-xs font-medium text-green-900`}
+            >
+              <div className="flex items-center gap-1 font-semibold mb-1">
+                <span className="text-base">←</span>
+                <span>{responseLabel}</span>
+              </div>
+              <div className="mt-1.5 pt-1.5 border-t border-current border-opacity-20">
+                <div className="text-[10px] opacity-60 mb-0.5 uppercase tracking-wide">
+                  Parameters
+                </div>
+                <div className="font-mono text-xs opacity-90 leading-relaxed">
+                  {responseParameters.map((param, idx) => (
+                    <div key={idx} className="flex items-center gap-1">
+                      <span className="opacity-50">•</span>
+                      <span className="font-semibold">{param}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
         </EdgeLabelRenderer>
