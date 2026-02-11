@@ -92,10 +92,12 @@ export const downloadFile = (content, filename, mimeType = 'text/plain') => {
   URL.revokeObjectURL(url);
 };
 
-// Format date for filename
+// Format date and time for filename with timestamp
 export const getFormattedDate = () => {
   const now = new Date();
-  return now.toISOString().split('T')[0];
+  const date = now.toISOString().split('T')[0]; // YYYY-MM-DD
+  const time = now.toISOString().split('T')[1].split('.')[0].replace(/:/g, ''); // HHMMSS
+  return `${date}-${time}`;
 };
 
 // Deep clone object
