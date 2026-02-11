@@ -152,11 +152,14 @@ function App() {
           console.log(`🖱️ Click screen: (${clickPosX}, ${clickPosY}), flow: (${flowPosition.x}, ${flowPosition.y})`);
           console.log(`📍 Node position: (${clickedNode.position.x}, ${clickedNode.position.y})`);
 
-          // Get node dimensions (use measured if available, fallback to defaults)
-          const nodeWidth = clickedNode.width || clickedNode.measured?.width || 250;
-          const nodeHeight = clickedNode.height || clickedNode.measured?.height || 150;
+          // Get node dimensions in flow coordinates
+          // Note: CSS dimensions (250×150) are in screen pixels, but we need flow coordinates
+          // Convert screen pixels to flow coordinates using zoom level
+          const zoom = reactFlowInstance.getZoom();
+          const nodeWidth = clickedNode.width || clickedNode.measured?.width || (250 / zoom);
+          const nodeHeight = clickedNode.height || clickedNode.measured?.height || (150 / zoom);
 
-          console.log(`📏 Node dimensions: ${nodeWidth}×${nodeHeight}`);
+          console.log(`📏 Node dimensions (flow): ${nodeWidth.toFixed(1)}×${nodeHeight.toFixed(1)} (zoom: ${zoom.toFixed(2)})`);
 
           // Calculate handle center positions in flow coordinates
           const handlePositions = {
