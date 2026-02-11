@@ -30,6 +30,7 @@ import { useExport } from './hooks/useExport';
 import { electronAPI } from './utils/ipc';
 import { generateNodeId, generateId } from './utils/helpers';
 import { DEFAULT_NODE_COLOR } from './constants/colors';
+import { setDebugMode } from './utils/debug';
 
 const nodeTypes = {
   platform: PlatformNode,
@@ -48,6 +49,14 @@ function App() {
   const [selectedNode, setSelectedNode] = useState(null);
   const [selectedEdge, setSelectedEdge] = useState(null);
   const [reactFlowInstance, setReactFlowInstance] = useState(null);
+  const [debugModeState, setDebugModeState] = useState(false);
+  const [showMiniMap, setShowMiniMap] = useState(true);
+
+  // Handle debug mode toggle
+  const handleDebugModeToggle = useCallback((enabled) => {
+    setDebugModeState(enabled);
+    setDebugMode(enabled); // Update global debug flag
+  }, []);
 
   // Hooks
   const { pushState, undo, redo, canUndo, canRedo, reset } = useHistory({
@@ -185,6 +194,19 @@ function App() {
     [setEdges]
   );
 
+  // Helper to convert handle type when reversing
+  // Converts "left-source" to "left-target" and vice versa
+  const convertHandleType = (handleId) => {
+    if (!handleId) return handleId;
+    if (handleId.endsWith('-source')) {
+      return handleId.replace('-source', '-target');
+    }
+    if (handleId.endsWith('-target')) {
+      return handleId.replace('-target', '-source');
+    }
+    return handleId;
+  };
+
   // Reverse edge direction (swap source and target)
   const handleReverseEdge = useCallback(
     (edgeId) => {
@@ -192,13 +214,14 @@ function App() {
         eds.map((e) => {
           if (e.id !== edgeId) return e;
 
-          // Swap source and target
+          // Swap source and target nodes
+          // Also swap handle types: source->target, target->source
           const reversed = {
             ...e,
             source: e.target,
             target: e.source,
-            sourceHandle: e.targetHandle,
-            targetHandle: e.sourceHandle,
+            sourceHandle: convertHandleType(e.targetHandle),
+            targetHandle: convertHandleType(e.sourceHandle),
           };
 
           // For bidirectional connections, also swap request/response
@@ -432,6 +455,10 @@ function App() {
         onExport={handleExport}
         canUndo={canUndo}
         canRedo={canRedo}
+        debugMode={debugModeState}
+        onDebugModeToggle={handleDebugModeToggle}
+        showMiniMap={showMiniMap}
+        onMiniMapToggle={setShowMiniMap}
       />
 
       <div className="flex flex-1 overflow-hidden">
@@ -481,12 +508,14 @@ function App() {
             >
               <Background color="#aaa" gap={16} />
               <Controls />
-              <MiniMap
-                nodeColor={(node) => node.data.color}
-                className="!bg-white !border-gray-300"
-                zoomable
-                pannable
-              />
+              {showMiniMap && (
+                <MiniMap
+                  nodeColor={(node) => node.data.color}
+                  className="!bg-white !border-gray-300"
+                  zoomable
+                  pannable
+                />
+              )}
             </ReactFlow>
           </div>
         </div>
