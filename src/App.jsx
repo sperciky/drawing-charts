@@ -51,6 +51,7 @@ function App() {
   const [reactFlowInstance, setReactFlowInstance] = useState(null);
   const [debugModeState, setDebugModeState] = useState(false);
   const [showMiniMap, setShowMiniMap] = useState(true);
+  const [reconnectMode, setReconnectMode] = useState(null); // { edgeId, endpoint: 'source' | 'target' }
 
   // Handle debug mode toggle
   const handleDebugModeToggle = useCallback((enabled) => {
@@ -107,9 +108,40 @@ function App() {
 
   // Handle node click
   const onNodeClick = useCallback((event, node) => {
+    // If in reconnection mode, reconnect the edge
+    if (reconnectMode) {
+      const { edgeId, endpoint } = reconnectMode;
+
+      setEdges((eds) =>
+        eds.map((edge) => {
+          if (edge.id !== edgeId) return edge;
+
+          if (endpoint === 'source') {
+            // Reconnect source to clicked node
+            return {
+              ...edge,
+              source: node.id,
+              sourceHandle: `${node.position?.x < edge.target ? 'right' : 'left'}-source`,
+            };
+          } else {
+            // Reconnect target to clicked node
+            return {
+              ...edge,
+              target: node.id,
+              targetHandle: `${node.position?.x > edge.source ? 'left' : 'right'}-target`,
+            };
+          }
+        })
+      );
+
+      setReconnectMode(null);
+      console.log(`✅ Edge ${edgeId} reconnected: ${endpoint} → ${node.id}`);
+      return;
+    }
+
     setSelectedNode(node);
     setSelectedEdge(null);
-  }, []);
+  }, [reconnectMode, setEdges]);
 
   // Handle edge click
   const onEdgeClick = useCallback((event, edge) => {
@@ -119,9 +151,15 @@ function App() {
 
   // Handle pane click (deselect)
   const onPaneClick = useCallback(() => {
+    // Cancel reconnection mode if active
+    if (reconnectMode) {
+      handleCancelReconnection();
+      return;
+    }
+
     setSelectedNode(null);
     setSelectedEdge(null);
-  }, []);
+  }, [reconnectMode, handleCancelReconnection]);
 
   // Handle connection
   const onConnect = useCallback(
@@ -318,6 +356,19 @@ function App() {
     },
     [setEdges, selectedEdge]
   );
+
+  // Start edge reconnection mode
+  const handleStartReconnection = useCallback((edgeId, endpoint) => {
+    setReconnectMode({ edgeId, endpoint });
+    console.log(`🔄 Reconnection mode started: ${endpoint} of edge ${edgeId}`);
+    console.log('👆 Click on a node to reconnect to it');
+  }, []);
+
+  // Cancel reconnection mode
+  const handleCancelReconnection = useCallback(() => {
+    setReconnectMode(null);
+    console.log('❌ Reconnection mode cancelled');
+  }, []);
 
   // Validate connections to ensure proper handle types
   const isValidConnection = useCallback((connection) => {
@@ -666,6 +717,9 @@ function App() {
             onReverse={handleReverseEdge}
             onDelete={handleDeleteEdge}
             onClose={() => setSelectedEdge(null)}
+            onStartReconnection={handleStartReconnection}
+            onCancelReconnection={handleCancelReconnection}
+            reconnectMode={reconnectMode}
           />
         )}
       </div>

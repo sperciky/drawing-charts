@@ -2,10 +2,19 @@ import React, { useState, useEffect } from 'react';
 import Button from '../ui/Button';
 import Input from '../ui/Input';
 import Dropdown from '../ui/Dropdown';
-import { X, Trash2, Plus, ArrowLeftRight, ChevronUp, ChevronDown } from 'lucide-react';
+import { X, Trash2, Plus, ArrowLeftRight, ChevronUp, ChevronDown, Link2 } from 'lucide-react';
 import { EDGE_TYPES } from '../../constants/colors';
 
-const EdgeEditor = ({ edge, onUpdate, onReverse, onDelete, onClose }) => {
+const EdgeEditor = ({
+  edge,
+  onUpdate,
+  onReverse,
+  onDelete,
+  onClose,
+  onStartReconnection,
+  onCancelReconnection,
+  reconnectMode
+}) => {
   const [label, setLabel] = useState(edge.label || '');
   const [animated, setAnimated] = useState(edge.animated || false);
   const [edgeType, setEdgeType] = useState(edge.data?.type || 'smoothstep');
@@ -153,19 +162,55 @@ const EdgeEditor = ({ edge, onUpdate, onReverse, onDelete, onClose }) => {
 
       {/* Content */}
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
-        {/* Reconnect Help */}
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-          <div className="flex items-start gap-2">
-            <div className="flex-shrink-0 w-5 h-5 rounded-full bg-blue-500 mt-0.5 animate-pulse" />
-            <div className="flex-1 text-xs text-blue-900">
-              <p className="font-semibold mb-1">How to Reconnect:</p>
-              <p className="leading-relaxed">
-                With this edge selected, you'll see pulsing circle(s) on the diagram.
-                <strong> Click and drag from within the colored circle</strong> to reconnect
-                the edge to a different node.
-              </p>
-            </div>
+        {/* Reconnect Buttons */}
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 space-y-2">
+          <div className="flex items-center gap-2 mb-2">
+            <Link2 size={16} className="text-blue-600" />
+            <p className="text-xs font-semibold text-blue-900">Reconnect Edge:</p>
           </div>
+
+          {reconnectMode?.edgeId === edge.id ? (
+            <div className="space-y-2">
+              <div className="bg-yellow-50 border border-yellow-300 rounded px-3 py-2 text-xs text-yellow-900">
+                <p className="font-semibold">🔄 Reconnection Mode Active</p>
+                <p className="mt-1">
+                  Reconnecting <strong>{reconnectMode.endpoint}</strong>.
+                  Click on any node to reconnect to it.
+                </p>
+              </div>
+              <Button
+                onClick={onCancelReconnection}
+                variant="secondary"
+                size="sm"
+                icon={<X size={14} />}
+                className="w-full"
+              >
+                Cancel Reconnection
+              </Button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-2">
+              <Button
+                onClick={() => onStartReconnection(edge.id, 'source')}
+                variant="secondary"
+                size="sm"
+                icon={<Link2 size={14} />}
+                disabled={directionType === 'unidirectional'}
+                title={directionType === 'unidirectional' ? 'Source is fixed for unidirectional edges' : 'Reconnect where this edge starts'}
+              >
+                {directionType === 'unidirectional' ? 'Source Fixed' : 'Reconnect Source'}
+              </Button>
+              <Button
+                onClick={() => onStartReconnection(edge.id, 'target')}
+                variant="secondary"
+                size="sm"
+                icon={<Link2 size={14} />}
+                title="Reconnect where this edge points to"
+              >
+                Reconnect Target
+              </Button>
+            </div>
+          )}
         </div>
 
         {/* Label */}
