@@ -142,16 +142,38 @@ function App() {
       console.log('📍 Clicked node position:', clickedNode.position);
       console.log('📍 Other node position:', otherNode?.position);
 
-      // Determine handles based on relative positions
+      // Calculate which side to connect to based on relative positions
+      // This considers all 4 directions: top, right, bottom, left
       let newHandle;
+      if (otherNode) {
+        const dx = otherNode.position.x - clickedNode.position.x;
+        const dy = otherNode.position.y - clickedNode.position.y;
+
+        // Determine the primary direction based on which delta is larger
+        const absX = Math.abs(dx);
+        const absY = Math.abs(dy);
+
+        let side;
+        if (absX > absY) {
+          // Horizontal connection is stronger
+          side = dx > 0 ? 'right' : 'left';
+        } else {
+          // Vertical connection is stronger
+          side = dy > 0 ? 'bottom' : 'top';
+        }
+
+        // Construct handle name based on endpoint type
+        const handleType = endpoint === 'source' ? '-source' : '-target';
+        newHandle = side + handleType;
+
+        console.log(`📐 Direction: dx=${dx}, dy=${dy}, side=${side}, handle=${newHandle}`);
+      } else {
+        // Fallback to right/left if other node not found
+        newHandle = endpoint === 'source' ? 'right-source' : 'left-target';
+      }
+
       if (endpoint === 'source') {
-        // Reconnecting source: if new source is LEFT of target, use right-source
-        newHandle = otherNode && clickedNode.position.x < otherNode.position.x
-          ? 'right-source'
-          : 'left-source';
-
         console.log(`✅ Setting source: ${clickedNode.id}, handle: ${newHandle}`);
-
         setEdges((eds) =>
           eds.map((edge) =>
             edge.id === edgeId
@@ -160,13 +182,7 @@ function App() {
           )
         );
       } else {
-        // Reconnecting target: if new target is RIGHT of source, use left-target
-        newHandle = otherNode && clickedNode.position.x > otherNode.position.x
-          ? 'left-target'
-          : 'right-target';
-
         console.log(`✅ Setting target: ${clickedNode.id}, handle: ${newHandle}`);
-
         setEdges((eds) =>
           eds.map((edge) =>
             edge.id === edgeId
