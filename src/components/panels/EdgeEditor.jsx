@@ -10,7 +10,7 @@ const EdgeEditor = ({ edge, onUpdate, onDelete, onClose }) => {
   const [animated, setAnimated] = useState(edge.animated || false);
   const [edgeType, setEdgeType] = useState(edge.type || 'smoothstep');
   const [directionType, setDirectionType] = useState(edge.data?.directionType || 'unidirectional');
-  const [connectionType, setConnectionType] = useState(edge.data?.connectionType || 'request');
+  const [connectionType, setConnectionType] = useState(edge.data?.connectionType || 'none');
   const [parameters, setParameters] = useState(edge.data?.parameters || []);
   const [newParameter, setNewParameter] = useState('');
 
@@ -19,7 +19,7 @@ const EdgeEditor = ({ edge, onUpdate, onDelete, onClose }) => {
     setAnimated(edge.animated || false);
     setEdgeType(edge.type || 'smoothstep');
     setDirectionType(edge.data?.directionType || 'unidirectional');
-    setConnectionType(edge.data?.connectionType || 'request');
+    setConnectionType(edge.data?.connectionType || 'none');
     setParameters(edge.data?.parameters || []);
   }, [edge]);
 
@@ -98,19 +98,19 @@ const EdgeEditor = ({ edge, onUpdate, onDelete, onClose }) => {
           options={[
             { label: '→ Unidirectional', value: 'unidirectional' },
             { label: '↔ Bidirectional', value: 'bidirectional' },
-            { label: '⇄ Request/Response Pair', value: 'request-response' },
           ]}
           value={directionType}
           onChange={setDirectionType}
         />
 
-        {/* Connection Type - only show for request-response */}
-        {directionType === 'request-response' && (
+        {/* Connection Role - only for unidirectional */}
+        {directionType === 'unidirectional' && (
           <Dropdown
-            label="This Connection Is"
+            label="Connection Role (Optional)"
             options={[
-              { label: '→ Request', value: 'request' },
-              { label: '← Response', value: 'response' },
+              { label: 'None (Gray)', value: 'none' },
+              { label: '→ Request (Blue)', value: 'request' },
+              { label: '← Response (Green)', value: 'response' },
             ]}
             value={connectionType}
             onChange={setConnectionType}
@@ -129,7 +129,7 @@ const EdgeEditor = ({ edge, onUpdate, onDelete, onClose }) => {
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <label className="text-sm font-medium text-gray-700">Parameters Delivered</label>
-            {directionType === 'request-response' && (
+            {connectionType !== 'none' && (
               <span className={`text-xs px-2 py-0.5 rounded ${
                 connectionType === 'request'
                   ? 'bg-blue-100 text-blue-700'
@@ -179,9 +179,9 @@ const EdgeEditor = ({ edge, onUpdate, onDelete, onClose }) => {
             </div>
           ) : (
             <div className="text-xs text-gray-500 italic mt-2 p-2 bg-gray-50 rounded border border-gray-200">
-              {directionType === 'request-response' && connectionType === 'request'
+              {connectionType === 'request'
                 ? 'Add parameters sent in the request (e.g., userId, sessionToken)'
-                : directionType === 'request-response' && connectionType === 'response'
+                : connectionType === 'response'
                 ? 'Add parameters returned in the response (e.g., user, email, status)'
                 : 'Add parameters transmitted through this connection'}
             </div>
@@ -212,28 +212,33 @@ const EdgeEditor = ({ edge, onUpdate, onDelete, onClose }) => {
               Preview on Diagram:
             </p>
             <div className={`inline-block px-3 py-2 ${
-              directionType === 'request-response'
-                ? connectionType === 'request'
-                  ? 'bg-blue-50 border-blue-300 text-blue-900'
-                  : 'bg-green-50 border-green-300 text-green-900'
+              connectionType === 'request'
+                ? 'bg-blue-50 border-blue-300 text-blue-900'
+                : connectionType === 'response'
+                ? 'bg-green-50 border-green-300 text-green-900'
                 : directionType === 'bidirectional'
                 ? 'bg-purple-50 border-purple-300 text-purple-900'
                 : 'bg-gray-50 border-gray-300 text-gray-900'
             } border-2 rounded-lg shadow-sm text-xs font-medium`}>
-              <div className="font-semibold flex items-center gap-1 mb-1">
-                {directionType === 'request-response' && (
-                  <span className="text-base">
-                    {connectionType === 'request' ? '→' : '←'}
-                  </span>
-                )}
-                {directionType === 'bidirectional' && (
-                  <span className="text-base">↔</span>
-                )}
-                <span>{label || (directionType === 'request-response'
-                  ? (connectionType === 'request' ? 'Request' : 'Response')
-                  : directionType === 'bidirectional' ? 'Bidirectional' : 'Connection')}</span>
-              </div>
-              <div className="mt-1.5 pt-1.5 border-t border-current border-opacity-20">
+              {(label || connectionType !== 'none' || directionType === 'bidirectional') && (
+                <div className="font-semibold flex items-center gap-1 mb-1">
+                  {connectionType === 'request' && (
+                    <span className="text-base">→</span>
+                  )}
+                  {connectionType === 'response' && (
+                    <span className="text-base">←</span>
+                  )}
+                  {directionType === 'bidirectional' && (
+                    <span className="text-base">↔</span>
+                  )}
+                  <span>{label || (connectionType === 'request'
+                    ? 'Request'
+                    : connectionType === 'response'
+                    ? 'Response'
+                    : directionType === 'bidirectional' ? 'Bidirectional' : 'Connection')}</span>
+                </div>
+              )}
+              <div className={(label || connectionType !== 'none' || directionType === 'bidirectional') ? "mt-1.5 pt-1.5 border-t border-current border-opacity-20" : ""}>
                 <div className="text-[10px] opacity-60 mb-0.5 uppercase tracking-wide">
                   Parameters
                 </div>
@@ -259,7 +264,7 @@ const EdgeEditor = ({ edge, onUpdate, onDelete, onClose }) => {
           <p>
             To: <span className="font-mono">{edge.target}</span>
           </p>
-          {directionType === 'request-response' && (
+          {(connectionType === 'request' || connectionType === 'response') && (
             <p className="mt-2 pt-2 border-t border-gray-300 text-blue-600">
               💡 Tip: Create both Request and Response connections to see them side-by-side
             </p>
