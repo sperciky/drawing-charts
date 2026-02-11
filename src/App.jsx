@@ -550,20 +550,21 @@ function App() {
               onEdgeUpdate={onEdgeUpdate}
               onEdgeUpdateStart={(event, edge) => {
                 // Visual feedback when starting to drag edge endpoint
-                event.target.style.cursor = 'grabbing';
+                console.log('🔄 Starting edge reconnection:', edge.id);
               }}
               onEdgeUpdateEnd={(event, edge) => {
-                // Reset cursor after drag
-                event.target.style.cursor = 'default';
+                // This fires when drag ends without successful connection
+                console.log('🔄 Edge reconnection ended:', edge.id);
               }}
               onInit={setReactFlowInstance}
               nodeTypes={nodeTypes}
               edgeTypes={edgeTypes}
-              edgeUpdaterRadius={15}
+              edgeUpdaterRadius={20}
               fitView
               snapToGrid
               snapGrid={[15, 15]}
               connectionMode="loose"
+              connectionRadius={30}
               isValidConnection={() => true}
               defaultEdgeOptions={{
                 type: 'custom',
