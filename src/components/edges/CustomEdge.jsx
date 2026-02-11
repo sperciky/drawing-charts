@@ -201,14 +201,37 @@ const CustomEdge = ({
             className="nodrag nopan"
           >
             <div
-              className={`px-2 py-1 ${colors.bg} border ${
+              className={`px-3 py-2 ${colors.bg} border-2 ${
                 selected ? colors.selectedBorder : colors.border
-              } rounded shadow-sm text-xs font-medium ${colors.text}`}
+              } rounded-lg shadow-md text-xs font-medium ${colors.text}`}
             >
-              <div className="font-semibold">{displayLabel}</div>
+              {/* Connection Type Label */}
+              <div className="flex items-center gap-1 font-semibold mb-1">
+                {directionType === 'request-response' && (
+                  <span className="text-base">
+                    {connectionType === 'request' ? '→' : '←'}
+                  </span>
+                )}
+                {directionType === 'bidirectional' && (
+                  <span className="text-base">↔</span>
+                )}
+                <span>{displayLabel}</span>
+              </div>
+
+              {/* Parameters */}
               {parametersText && (
-                <div className="text-xs mt-1 opacity-90 font-mono">
-                  {parametersText}
+                <div className="mt-1.5 pt-1.5 border-t border-current border-opacity-20">
+                  <div className="text-[10px] opacity-60 mb-0.5 uppercase tracking-wide">
+                    Parameters
+                  </div>
+                  <div className="font-mono text-xs opacity-90 leading-relaxed">
+                    {parameters.map((param, idx) => (
+                      <div key={idx} className="flex items-center gap-1">
+                        <span className="opacity-50">•</span>
+                        <span className="font-semibold">{param}</span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>

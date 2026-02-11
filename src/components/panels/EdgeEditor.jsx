@@ -127,7 +127,18 @@ const EdgeEditor = ({ edge, onUpdate, onDelete, onClose }) => {
 
         {/* Parameters */}
         <div className="space-y-2">
-          <label className="text-sm font-medium text-gray-700">Parameters Delivered</label>
+          <div className="flex items-center justify-between">
+            <label className="text-sm font-medium text-gray-700">Parameters Delivered</label>
+            {directionType === 'request-response' && (
+              <span className={`text-xs px-2 py-0.5 rounded ${
+                connectionType === 'request'
+                  ? 'bg-blue-100 text-blue-700'
+                  : 'bg-green-100 text-green-700'
+              }`}>
+                {connectionType === 'request' ? '→ Request' : '← Response'}
+              </span>
+            )}
+          </div>
 
           {/* Add Parameter Input */}
           <div className="flex gap-2">
@@ -149,7 +160,7 @@ const EdgeEditor = ({ edge, onUpdate, onDelete, onClose }) => {
           </div>
 
           {/* Parameters List */}
-          {parameters.length > 0 && (
+          {parameters.length > 0 ? (
             <div className="space-y-1 mt-2">
               {parameters.map((param, index) => (
                 <div
@@ -165,6 +176,14 @@ const EdgeEditor = ({ edge, onUpdate, onDelete, onClose }) => {
                   </button>
                 </div>
               ))}
+            </div>
+          ) : (
+            <div className="text-xs text-gray-500 italic mt-2 p-2 bg-gray-50 rounded border border-gray-200">
+              {directionType === 'request-response' && connectionType === 'request'
+                ? 'Add parameters sent in the request (e.g., userId, sessionToken)'
+                : directionType === 'request-response' && connectionType === 'response'
+                ? 'Add parameters returned in the response (e.g., user, email, status)'
+                : 'Add parameters transmitted through this connection'}
             </div>
           )}
         </div>
@@ -186,6 +205,51 @@ const EdgeEditor = ({ edge, onUpdate, onDelete, onClose }) => {
           </button>
         </div>
 
+        {/* Visual Preview */}
+        {parameters.length > 0 && (
+          <div className="bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg p-3">
+            <p className="text-xs font-medium text-gray-700 mb-2">
+              Preview on Diagram:
+            </p>
+            <div className={`inline-block px-3 py-2 ${
+              directionType === 'request-response'
+                ? connectionType === 'request'
+                  ? 'bg-blue-50 border-blue-300 text-blue-900'
+                  : 'bg-green-50 border-green-300 text-green-900'
+                : directionType === 'bidirectional'
+                ? 'bg-purple-50 border-purple-300 text-purple-900'
+                : 'bg-gray-50 border-gray-300 text-gray-900'
+            } border-2 rounded-lg shadow-sm text-xs font-medium`}>
+              <div className="font-semibold flex items-center gap-1 mb-1">
+                {directionType === 'request-response' && (
+                  <span className="text-base">
+                    {connectionType === 'request' ? '→' : '←'}
+                  </span>
+                )}
+                {directionType === 'bidirectional' && (
+                  <span className="text-base">↔</span>
+                )}
+                <span>{label || (directionType === 'request-response'
+                  ? (connectionType === 'request' ? 'Request' : 'Response')
+                  : directionType === 'bidirectional' ? 'Bidirectional' : 'Connection')}</span>
+              </div>
+              <div className="mt-1.5 pt-1.5 border-t border-current border-opacity-20">
+                <div className="text-[10px] opacity-60 mb-0.5 uppercase tracking-wide">
+                  Parameters
+                </div>
+                <div className="font-mono text-xs opacity-90">
+                  {parameters.map((param, idx) => (
+                    <div key={idx} className="flex items-center gap-1">
+                      <span className="opacity-50">•</span>
+                      <span className="font-semibold">{param}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Info */}
         <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 text-xs text-gray-600">
           <p className="font-medium mb-1">Connection Info:</p>
@@ -195,6 +259,11 @@ const EdgeEditor = ({ edge, onUpdate, onDelete, onClose }) => {
           <p>
             To: <span className="font-mono">{edge.target}</span>
           </p>
+          {directionType === 'request-response' && (
+            <p className="mt-2 pt-2 border-t border-gray-300 text-blue-600">
+              💡 Tip: Create both Request and Response connections to see them side-by-side
+            </p>
+          )}
         </div>
       </div>
 
