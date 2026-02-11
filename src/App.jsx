@@ -184,6 +184,61 @@ function App() {
     [setEdges]
   );
 
+  // Reverse edge direction (swap source and target)
+  const handleReverseEdge = useCallback(
+    (edgeId) => {
+      setEdges((eds) =>
+        eds.map((e) => {
+          if (e.id !== edgeId) return e;
+
+          // Swap source and target
+          const reversed = {
+            ...e,
+            source: e.target,
+            target: e.source,
+            sourceHandle: e.targetHandle,
+            targetHandle: e.sourceHandle,
+          };
+
+          // For bidirectional connections, also swap request/response
+          if (e.data?.directionType === 'bidirectional') {
+            reversed.data = {
+              ...e.data,
+              requestLabel: e.data?.responseLabel || 'response',
+              responseLabel: e.data?.requestLabel || 'request',
+              requestParameters: e.data?.responseParameters || [],
+              responseParameters: e.data?.requestParameters || [],
+            };
+          }
+
+          return reversed;
+        })
+      );
+    },
+    [setEdges]
+  );
+
+  // Handle edge reconnection (drag and drop edge endpoint)
+  const onEdgeUpdate = useCallback(
+    (oldEdge, newConnection) => {
+      setEdges((els) =>
+        els.map((e) => {
+          if (e.id === oldEdge.id) {
+            return {
+              ...e,
+              source: newConnection.source,
+              target: newConnection.target,
+              sourceHandle: newConnection.sourceHandle,
+              targetHandle: newConnection.targetHandle,
+            };
+          }
+          return e;
+        })
+      );
+    },
+    [setEdges]
+  );
+
   // Delete edge
   const handleDeleteEdge = useCallback(
     (edgeId) => {
@@ -408,9 +463,19 @@ function App() {
               onEdgeClick={onEdgeClick}
               onPaneClick={onPaneClick}
               onNodeDragStop={onNodeDragStop}
+              onEdgeUpdate={onEdgeUpdate}
+              onEdgeUpdateStart={(event, edge) => {
+                // Visual feedback when starting to drag edge endpoint
+                event.target.style.cursor = 'grabbing';
+              }}
+              onEdgeUpdateEnd={(event, edge) => {
+                // Reset cursor after drag
+                event.target.style.cursor = 'default';
+              }}
               onInit={setReactFlowInstance}
               nodeTypes={nodeTypes}
               edgeTypes={edgeTypes}
+              edgeUpdaterRadius={15}
               fitView
               snapToGrid
               snapGrid={[15, 15]}
@@ -453,6 +518,7 @@ function App() {
           <EdgeEditor
             edge={selectedEdge}
             onUpdate={handleUpdateEdge}
+            onReverse={handleReverseEdge}
             onDelete={handleDeleteEdge}
             onClose={() => setSelectedEdge(null)}
           />

@@ -2,10 +2,10 @@ import React, { useState, useEffect } from 'react';
 import Button from '../ui/Button';
 import Input from '../ui/Input';
 import Dropdown from '../ui/Dropdown';
-import { X, Trash2, Plus } from 'lucide-react';
+import { X, Trash2, Plus, ArrowLeftRight } from 'lucide-react';
 import { EDGE_TYPES } from '../../constants/colors';
 
-const EdgeEditor = ({ edge, onUpdate, onDelete, onClose }) => {
+const EdgeEditor = ({ edge, onUpdate, onReverse, onDelete, onClose }) => {
   const [label, setLabel] = useState(edge.label || '');
   const [animated, setAnimated] = useState(edge.animated || false);
   const [edgeType, setEdgeType] = useState(edge.data?.type || 'smoothstep');
@@ -87,6 +87,10 @@ const EdgeEditor = ({ edge, onUpdate, onDelete, onClose }) => {
       e.preventDefault();
       handleAddResponseParameter();
     }
+  };
+
+  const handleReverseEdge = () => {
+    onReverse(edge.id);
   };
 
   const handleDeleteEdge = () => {
@@ -342,7 +346,16 @@ const EdgeEditor = ({ edge, onUpdate, onDelete, onClose }) => {
       </div>
 
       {/* Footer */}
-      <div className="px-4 py-3 border-t border-gray-200">
+      <div className="px-4 py-3 border-t border-gray-200 space-y-2">
+        <Button
+          onClick={handleReverseEdge}
+          variant="secondary"
+          size="md"
+          icon={<ArrowLeftRight size={16} />}
+          className="w-full"
+        >
+          Reverse Direction
+        </Button>
         <Button
           onClick={handleDeleteEdge}
           variant="danger"
