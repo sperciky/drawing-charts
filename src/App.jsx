@@ -53,6 +53,18 @@ function App() {
   const [showMiniMap, setShowMiniMap] = useState(true);
   const [reconnectMode, setReconnectMode] = useState(null); // { edgeId, endpoint: 'source' | 'target' }
 
+  // Reconnection mode handlers (defined early for use in other callbacks)
+  const handleStartReconnection = useCallback((edgeId, endpoint) => {
+    setReconnectMode({ edgeId, endpoint });
+    console.log(`🔄 Reconnection mode started: ${endpoint} of edge ${edgeId}`);
+    console.log('👆 Click on a node to reconnect to it');
+  }, []);
+
+  const handleCancelReconnection = useCallback(() => {
+    setReconnectMode(null);
+    console.log('❌ Reconnection mode cancelled');
+  }, []);
+
   // Handle debug mode toggle
   const handleDebugModeToggle = useCallback((enabled) => {
     setDebugModeState(enabled);
@@ -356,19 +368,6 @@ function App() {
     },
     [setEdges, selectedEdge]
   );
-
-  // Start edge reconnection mode
-  const handleStartReconnection = useCallback((edgeId, endpoint) => {
-    setReconnectMode({ edgeId, endpoint });
-    console.log(`🔄 Reconnection mode started: ${endpoint} of edge ${edgeId}`);
-    console.log('👆 Click on a node to reconnect to it');
-  }, []);
-
-  // Cancel reconnection mode
-  const handleCancelReconnection = useCallback(() => {
-    setReconnectMode(null);
-    console.log('❌ Reconnection mode cancelled');
-  }, []);
 
   // Validate connections to ensure proper handle types
   const isValidConnection = useCallback((connection) => {
