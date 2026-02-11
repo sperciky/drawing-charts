@@ -128,19 +128,44 @@ function App() {
         eds.map((edge) => {
           if (edge.id !== edgeId) return edge;
 
+          // Find the other node to determine handle positions
+          let otherNodeId;
           if (endpoint === 'source') {
-            // Reconnect source to clicked node
+            otherNodeId = edge.target;
+          } else {
+            otherNodeId = edge.source;
+          }
+
+          const otherNode = nodes.find(n => n.id === otherNodeId);
+
+          if (endpoint === 'source') {
+            // Reconnecting source to clicked node
+            // Determine which side to connect from based on relative positions
+            let sourceHandle;
+            if (otherNode) {
+              sourceHandle = node.position.x < otherNode.position.x ? 'right-source' : 'left-source';
+            } else {
+              sourceHandle = 'right-source'; // default
+            }
+
             return {
               ...edge,
               source: node.id,
-              sourceHandle: `${node.position?.x < edge.target ? 'right' : 'left'}-source`,
+              sourceHandle,
             };
           } else {
-            // Reconnect target to clicked node
+            // Reconnecting target to clicked node
+            let targetHandle;
+            if (otherNode) {
+              targetHandle = node.position.x > otherNode.position.x ? 'left-target' : 'right-target';
+            } else {
+              targetHandle = 'left-target'; // default
+            }
+
             return {
               ...edge,
               target: node.id,
-              targetHandle: `${node.position?.x > edge.source ? 'left' : 'right'}-target`,
+              targetHandle,
             };
           }
         })
@@ -153,7 +178,7 @@ function App() {
 
     setSelectedNode(node);
     setSelectedEdge(null);
-  }, [reconnectMode, setEdges]);
+  }, [reconnectMode, setEdges, nodes]);
 
   // Handle edge click
   const onEdgeClick = useCallback((event, edge) => {
