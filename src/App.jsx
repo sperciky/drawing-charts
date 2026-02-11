@@ -190,20 +190,28 @@ function App() {
   // Handle keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (event) => {
-      // Delete key
+      // Check if user is typing in an input field
+      const isTyping =
+        event.target.tagName === 'INPUT' ||
+        event.target.tagName === 'TEXTAREA' ||
+        event.target.isContentEditable;
+
+      // Delete key - only if NOT typing in an input field
       if (event.key === 'Delete' || event.key === 'Backspace') {
-        if (selectedNode) {
-          event.preventDefault();
-          handleDeleteNode(selectedNode.id);
-          setSelectedNode(null);
-        } else if (selectedEdge) {
-          event.preventDefault();
-          handleDeleteEdge(selectedEdge.id);
-          setSelectedEdge(null);
+        if (!isTyping) {
+          if (selectedNode) {
+            event.preventDefault();
+            handleDeleteNode(selectedNode.id);
+            setSelectedNode(null);
+          } else if (selectedEdge) {
+            event.preventDefault();
+            handleDeleteEdge(selectedEdge.id);
+            setSelectedEdge(null);
+          }
         }
       }
 
-      // Undo/Redo
+      // Undo/Redo - works even when typing
       if (event.ctrlKey || event.metaKey) {
         if (event.key === 'z' && !event.shiftKey) {
           event.preventDefault();

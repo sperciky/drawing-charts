@@ -16,18 +16,14 @@ const NodeEditor = ({ node, onUpdate, onDelete, onClose }) => {
     setAttributes(node.data.attributes || []);
   }, [node]);
 
-  const handleUpdate = () => {
+  // Update node whenever name, color, or attributes change
+  useEffect(() => {
     onUpdate(node.id, {
-      ...node.data,
       name,
       color,
       attributes,
     });
-  };
-
-  useEffect(() => {
-    handleUpdate();
-  }, [name, color, attributes]);
+  }, [name, color, attributes, node.id, onUpdate]);
 
   const handleAddAttribute = () => {
     setAttributes([
