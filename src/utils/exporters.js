@@ -27,6 +27,9 @@ export const exportJSON = (nodes, edges, metadata = {}) => {
       label: edge.label || '',
       animated: edge.animated || false,
       type: edge.type || 'custom',
+      markerEnd: edge.markerEnd,
+      markerStart: edge.markerStart,
+      style: edge.style,
       data: edge.data || {}, // Includes requestLabel, responseLabel, requestParameters, responseParameters, etc.
     })),
   };
@@ -81,6 +84,34 @@ export const exportXML = (nodes, edges, metadata = {}) => {
     xml += ` animated="${edge.animated || false}"`;
     xml += ` type="${edge.type || 'custom'}"`;
     xml += '>\n';
+
+    // Marker configuration (arrows)
+    if (edge.markerEnd) {
+      xml += '      <markerEnd>\n';
+      xml += `        <type>${edge.markerEnd.type}</type>\n`;
+      if (edge.markerEnd.width) xml += `        <width>${edge.markerEnd.width}</width>\n`;
+      if (edge.markerEnd.height) xml += `        <height>${edge.markerEnd.height}</height>\n`;
+      if (edge.markerEnd.color) xml += `        <color>${edge.markerEnd.color}</color>\n`;
+      xml += '      </markerEnd>\n';
+    }
+
+    if (edge.markerStart) {
+      xml += '      <markerStart>\n';
+      xml += `        <type>${edge.markerStart.type}</type>\n`;
+      if (edge.markerStart.width) xml += `        <width>${edge.markerStart.width}</width>\n`;
+      if (edge.markerStart.height) xml += `        <height>${edge.markerStart.height}</height>\n`;
+      if (edge.markerStart.color) xml += `        <color>${edge.markerStart.color}</color>\n`;
+      xml += '      </markerStart>\n';
+    }
+
+    // Edge style
+    if (edge.style) {
+      xml += '      <style>\n';
+      Object.entries(edge.style).forEach(([key, value]) => {
+        xml += `        <${key}>${escapeXml(String(value))}</${key}>\n`;
+      });
+      xml += '      </style>\n';
+    }
 
     // Edge data (requestParameters, responseParameters, etc.)
     if (edge.data) {

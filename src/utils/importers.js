@@ -20,10 +20,21 @@ export const parseJSON = (jsonString) => {
       },
     }));
 
+    // Ensure edges have default markers if missing (backward compatibility)
+    const edges = data.edges.map((edge) => ({
+      ...edge,
+      // Add default markerEnd if missing
+      markerEnd: edge.markerEnd || {
+        type: 'arrowclosed',
+        width: 20,
+        height: 20,
+      },
+    }));
+
     return {
       success: true,
       nodes,
-      edges: data.edges,
+      edges,
       metadata: data.metadata || {},
     };
   } catch (error) {
@@ -100,6 +111,53 @@ export const parseXML = (xmlString) => {
     // Parse edges
     const edgeElements = xmlDoc.querySelectorAll('edges > edge');
     edgeElements.forEach((edgeEl) => {
+      // Parse marker configuration
+      let markerEnd = undefined;
+      const markerEndEl = edgeEl.querySelector('markerEnd');
+      if (markerEndEl) {
+        const typeEl = markerEndEl.querySelector('type');
+        const widthEl = markerEndEl.querySelector('width');
+        const heightEl = markerEndEl.querySelector('height');
+        const colorEl = markerEndEl.querySelector('color');
+
+        markerEnd = {
+          type: typeEl?.textContent,
+        };
+        if (widthEl) markerEnd.width = parseInt(widthEl.textContent);
+        if (heightEl) markerEnd.height = parseInt(heightEl.textContent);
+        if (colorEl) markerEnd.color = colorEl.textContent;
+      }
+
+      let markerStart = undefined;
+      const markerStartEl = edgeEl.querySelector('markerStart');
+      if (markerStartEl) {
+        const typeEl = markerStartEl.querySelector('type');
+        const widthEl = markerStartEl.querySelector('width');
+        const heightEl = markerStartEl.querySelector('height');
+        const colorEl = markerStartEl.querySelector('color');
+
+        markerStart = {
+          type: typeEl?.textContent,
+        };
+        if (widthEl) markerStart.width = parseInt(widthEl.textContent);
+        if (heightEl) markerStart.height = parseInt(heightEl.textContent);
+        if (colorEl) markerStart.color = colorEl.textContent;
+      }
+
+      // Parse style
+      let style = undefined;
+      const styleEl = edgeEl.querySelector('style');
+      if (styleEl) {
+        style = {};
+        Array.from(styleEl.children).forEach((child) => {
+          const key = child.tagName;
+          const value = child.textContent;
+          // Try to parse numbers
+          style[key] = isNaN(value) ? value : parseFloat(value);
+        });
+      }
+
+      // Parse data
       const dataEl = edgeEl.querySelector('data');
       const edgeData = {};
 
@@ -141,6 +199,14 @@ export const parseXML = (xmlString) => {
         label: edgeEl.getAttribute('label') || '',
         animated: edgeEl.getAttribute('animated') === 'true',
         type: edgeEl.getAttribute('type') || 'custom',
+        // Add default markerEnd if missing (backward compatibility)
+        markerEnd: markerEnd || {
+          type: 'arrowclosed',
+          width: 20,
+          height: 20,
+        },
+        markerStart: markerStart,
+        style: style,
         data: Object.keys(edgeData).length > 0 ? edgeData : undefined,
       });
     });
