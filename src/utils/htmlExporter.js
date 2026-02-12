@@ -310,11 +310,85 @@ const generateHTMLTemplate = (diagramData, title, timestamp) => {
 
     // Custom Node Component - matches PlatformNode
     const CustomNode = ({ data }) => {
+      const { Handle } = window.ReactFlow;
       const name = data.name || data.label || 'Untitled';
       const color = data.color || '#6b7280';
       const attributes = data.attributes || [];
 
       const children = [];
+
+      // Add all connection handles (required for edges to render!)
+      // Top handles
+      children.push(
+        React.createElement(Handle, {
+          key: 'top-target',
+          type: 'target',
+          position: 'top',
+          id: 'top-target',
+          style: { opacity: 0 }
+        }),
+        React.createElement(Handle, {
+          key: 'top-source',
+          type: 'source',
+          position: 'top',
+          id: 'top-source',
+          style: { opacity: 0 }
+        })
+      );
+
+      // Bottom handles
+      children.push(
+        React.createElement(Handle, {
+          key: 'bottom-target',
+          type: 'target',
+          position: 'bottom',
+          id: 'bottom-target',
+          style: { opacity: 0 }
+        }),
+        React.createElement(Handle, {
+          key: 'bottom-source',
+          type: 'source',
+          position: 'bottom',
+          id: 'bottom-source',
+          style: { opacity: 0 }
+        })
+      );
+
+      // Left handles
+      children.push(
+        React.createElement(Handle, {
+          key: 'left-target',
+          type: 'target',
+          position: 'left',
+          id: 'left-target',
+          style: { opacity: 0 }
+        }),
+        React.createElement(Handle, {
+          key: 'left-source',
+          type: 'source',
+          position: 'left',
+          id: 'left-source',
+          style: { opacity: 0 }
+        })
+      );
+
+      // Right handles
+      children.push(
+        React.createElement(Handle, {
+          key: 'right-target',
+          type: 'target',
+          position: 'right',
+          id: 'right-target',
+          style: { opacity: 0 }
+        }),
+        React.createElement(Handle, {
+          key: 'right-source',
+          type: 'source',
+          position: 'right',
+          id: 'right-source',
+          style: { opacity: 0 }
+        })
+      );
 
       // Header with colored background
       children.push(
