@@ -387,123 +387,163 @@ const generateHTMLTemplate = (diagramData, title, timestamp) => {
     };
 
     // Custom Edge Component
-    const CustomEdge = ({
-      id,
-      sourceX,
-      sourceY,
-      targetX,
-      targetY,
-      sourcePosition,
-      targetPosition,
-      data,
-      label,
-      markerEnd
-    }) => {
-      const { BaseEdge, EdgeLabelRenderer, getSmoothStepPath } = window.ReactFlow;
+    const CustomEdge = (props) => {
+      console.log('🔵 CustomEdge called!', props);
 
-      const directionType = data?.directionType || 'unidirectional';
-      const edgeType = data?.type || 'smoothstep';
+      try {
+        const {
+          id,
+          sourceX,
+          sourceY,
+          targetX,
+          targetY,
+          sourcePosition,
+          targetPosition,
+          data = {},
+          label,
+          markerEnd,
+          style = {}
+        } = props;
 
-      // Get the path calculation function
-      let getPath = getSmoothStepPath;
-      if (edgeType === 'straight') {
-        getPath = window.ReactFlow.getStraightPath;
-      } else if (edgeType === 'step') {
-        getPath = window.ReactFlow.getStepPath;
-      } else if (edgeType === 'bezier') {
-        getPath = window.ReactFlow.getBezierPath;
-      }
+        console.log('🔵 Positions:', { sourceX, sourceY, targetX, targetY });
 
-      if (directionType === 'bidirectional') {
-        const offset = 15;
-        const dx = targetX - sourceX;
-        const dy = targetY - sourceY;
-        const length = Math.sqrt(dx * dx + dy * dy);
-        const offsetX = (-dy / length) * offset;
-        const offsetY = (dx / length) * offset;
+        const { BaseEdge, EdgeLabelRenderer, getSmoothStepPath, getBezierPath, getStraightPath } = window.ReactFlow;
 
-        const [requestPath] = getPath({
-          sourceX: sourceX + offsetX,
-          sourceY: sourceY + offsetY,
-          targetX: targetX + offsetX,
-          targetY: targetY + offsetY,
+        const directionType = data.directionType || 'unidirectional';
+        const edgeType = data.type || 'smoothstep';
+        const edgeLabel = data.label || label || '';
+
+        console.log('🔵 Edge config:', { directionType, edgeType, edgeLabel });
+
+        // Get the path calculation function
+        let getPath = getSmoothStepPath;
+        if (edgeType === 'straight') {
+          getPath = getStraightPath;
+        } else if (edgeType === 'bezier') {
+          getPath = getBezierPath;
+        }
+
+        if (directionType === 'bidirectional') {
+          const offset = 15;
+          const dx = targetX - sourceX;
+          const dy = targetY - sourceY;
+          const length = Math.sqrt(dx * dx + dy * dy);
+
+          if (length === 0) {
+            return null; // Prevent division by zero
+          }
+
+          const offsetX = (-dy / length) * offset;
+          const offsetY = (dx / length) * offset;
+
+          const [requestPath] = getPath({
+            sourceX: sourceX + offsetX,
+            sourceY: sourceY + offsetY,
+            targetX: targetX + offsetX,
+            targetY: targetY + offsetY,
+            sourcePosition,
+            targetPosition,
+          });
+
+          const [responsePath] = getPath({
+            sourceX: targetX - offsetX,
+            sourceY: targetY - offsetY,
+            targetX: sourceX - offsetX,
+            targetY: sourceY - offsetY,
+            sourcePosition: targetPosition,
+            targetPosition: sourcePosition,
+          });
+
+          const labelX = (sourceX + targetX) / 2;
+          const labelY = (sourceY + targetY) / 2;
+
+          return React.createElement('g', { className: 'react-flow__edge' }, [
+            React.createElement('path', {
+              key: 'request',
+              id: id + '-request',
+              d: requestPath,
+              fill: 'none',
+              stroke: '#3b82f6',
+              strokeWidth: 2,
+              markerEnd: 'url(#arrow-blue)',
+              className: 'react-flow__edge-path'
+            }),
+            React.createElement('path', {
+              key: 'response',
+              id: id + '-response',
+              d: responsePath,
+              fill: 'none',
+              stroke: '#10b981',
+              strokeWidth: 2,
+              strokeDasharray: '5,5',
+              markerEnd: 'url(#arrow-green)',
+              className: 'react-flow__edge-path'
+            }),
+            edgeLabel && React.createElement(EdgeLabelRenderer, { key: 'label' },
+              React.createElement('div', {
+                className: 'edge-label',
+                style: {
+                  position: 'absolute',
+                  transform: 'translate(-50%, -50%) translate(' + labelX + 'px, ' + labelY + 'px)',
+                  background: '#fff',
+                  padding: '4px 8px',
+                  borderRadius: '4px',
+                  fontSize: '12px',
+                  border: '1px solid #ccc',
+                  pointerEvents: 'all',
+                }
+              }, edgeLabel)
+            )
+          ]);
+        }
+
+        // Unidirectional
+        const [edgePath, labelX, labelY] = getPath({
+          sourceX,
+          sourceY,
+          targetX,
+          targetY,
           sourcePosition,
           targetPosition,
         });
 
-        const [responsePath] = getPath({
-          sourceX: targetX - offsetX,
-          sourceY: targetY - offsetY,
-          targetX: sourceX - offsetX,
-          targetY: sourceY - offsetY,
-          sourcePosition: targetPosition,
-          targetPosition: sourcePosition,
-        });
+        console.log('🔵 Generated path:', edgePath, 'label position:', labelX, labelY);
 
-        return React.createElement(React.Fragment, null, [
+        const result = React.createElement('g', { className: 'react-flow__edge' }, [
           React.createElement('path', {
-            key: 'request',
-            d: requestPath,
+            key: 'path',
+            id: id,
+            d: edgePath,
             fill: 'none',
-            stroke: '#3b82f6',
+            stroke: '#6b7280',
             strokeWidth: 2,
-            markerEnd: 'url(#arrow-blue)',
-            className: 'react-flow__edge-path'
+            markerEnd: 'url(#arrow-gray)',
+            className: 'react-flow__edge-path',
+            ...style
           }),
-          React.createElement('path', {
-            key: 'response',
-            d: responsePath,
-            fill: 'none',
-            stroke: '#10b981',
-            strokeWidth: 2,
-            strokeDasharray: '5,5',
-            markerEnd: 'url(#arrow-green)',
-            className: 'react-flow__edge-path'
-          }),
-          label && React.createElement(EdgeLabelRenderer, { key: 'label' },
+          edgeLabel && React.createElement(EdgeLabelRenderer, { key: 'label' },
             React.createElement('div', {
               className: 'edge-label',
               style: {
                 position: 'absolute',
-                transform: \`translate(-50%, -50%) translate(\${(sourceX + targetX) / 2}px, \${(sourceY + targetY) / 2}px)\`,
+                transform: 'translate(-50%, -50%) translate(' + labelX + 'px, ' + labelY + 'px)',
+                background: '#fff',
+                padding: '4px 8px',
+                borderRadius: '4px',
+                fontSize: '12px',
+                border: '1px solid #ccc',
                 pointerEvents: 'all',
               }
-            }, label)
+            }, edgeLabel)
           )
         ]);
+
+        console.log('🔵 Returning edge element:', result);
+        return result;
+      } catch (error) {
+        console.error('❌ CustomEdge error:', error, error.stack);
+        return null;
       }
-
-      // Unidirectional
-      const [edgePath, labelX, labelY] = getPath({
-        sourceX,
-        sourceY,
-        targetX,
-        targetY,
-        sourcePosition,
-        targetPosition,
-      });
-
-      return React.createElement(React.Fragment, null, [
-        React.createElement('path', {
-          key: 'path',
-          d: edgePath,
-          fill: 'none',
-          stroke: '#6b7280',
-          strokeWidth: 2,
-          markerEnd: 'url(#arrow-gray)',
-          className: 'react-flow__edge-path'
-        }),
-        label && React.createElement(EdgeLabelRenderer, { key: 'label' },
-          React.createElement('div', {
-            className: 'edge-label',
-            style: {
-              position: 'absolute',
-              transform: \`translate(-50%, -50%) translate(\${labelX}px, \${labelY}px)\`,
-              pointerEvents: 'all',
-            }
-          }, label)
-        )
-      ]);
     };
 
     // Main Viewer Component
