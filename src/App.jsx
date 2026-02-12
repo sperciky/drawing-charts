@@ -91,7 +91,7 @@ function App() {
     currentFilePath,
     diagramName,
   } = useFileOperations();
-  const { exportImage } = useExport(reactFlowRef);
+  const { exportImage } = useExport(reactFlowRef, nodes, edges);
 
   // Fix any broken edges on mount (edges with invalid handle types)
   useEffect(() => {

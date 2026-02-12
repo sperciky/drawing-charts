@@ -1,9 +1,10 @@
 import { useCallback, useRef } from 'react';
 import { electronAPI } from '../utils/ipc';
 import { exportPNG, exportJPG, exportSVG, exportPDF } from '../utils/exporters';
+import { exportToHTML } from '../utils/htmlExporter';
 import { downloadFile } from '../utils/helpers';
 
-export function useExport(reactFlowRef) {
+export function useExport(reactFlowRef, nodes, edges) {
   const isExporting = useRef(false);
 
   const exportImage = useCallback(
@@ -19,6 +20,17 @@ export function useExport(reactFlowRef) {
         let result;
 
         switch (format) {
+          case 'html':
+            // Export as standalone HTML viewer
+            try {
+              const filename = exportToHTML(nodes, edges, 'Diagram');
+              isExporting.current = false;
+              return { success: true, filename };
+            } catch (error) {
+              console.error('Error exporting HTML:', error);
+              isExporting.current = false;
+              return { success: false, error: error.message };
+            }
           case 'png':
             result = await exportPNG(reactFlowRef);
             break;
@@ -63,7 +75,7 @@ export function useExport(reactFlowRef) {
         return { success: false, error: error.message };
       }
     },
-    [reactFlowRef]
+    [reactFlowRef, nodes, edges]
   );
 
   return {
