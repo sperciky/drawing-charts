@@ -3,38 +3,128 @@
  */
 
 export const exportToHTML = (nodes, edges, diagramTitle = 'Diagram') => {
-  const timestamp = new Date().toISOString().split('T')[0];
-  const filename = `${diagramTitle.replace(/[^a-z0-9]/gi, '-').toLowerCase()}-${timestamp}.html`;
+  console.log('🚀 [HTML Export] Starting export process...');
+  console.log('📊 [HTML Export] Input:', {
+    nodeCount: nodes?.length || 0,
+    edgeCount: edges?.length || 0,
+    diagramTitle,
+    nodesType: typeof nodes,
+    edgesType: typeof edges,
+    nodesIsArray: Array.isArray(nodes),
+    edgesIsArray: Array.isArray(edges)
+  });
 
-  // Serialize the diagram data
-  const diagramData = {
-    nodes: nodes.map(node => ({
-      id: node.id,
-      type: node.type,
-      position: node.position,
-      data: {
-        label: node.data.label,
-        color: node.data.color,
-        description: node.data.description,
-      },
-    })),
-    edges: edges.map(edge => ({
-      id: edge.id,
-      source: edge.source,
-      target: edge.target,
-      type: edge.type,
-      label: edge.label,
-      data: edge.data,
-    })),
-  };
+  try {
+    // Validate inputs
+    if (!nodes) {
+      const error = 'Nodes parameter is missing or undefined';
+      console.error('❌ [HTML Export]', error, { nodes });
+      throw new Error(error);
+    }
+    if (!edges) {
+      const error = 'Edges parameter is missing or undefined';
+      console.error('❌ [HTML Export]', error, { edges });
+      throw new Error(error);
+    }
+    if (!Array.isArray(nodes)) {
+      const error = `Nodes must be an array, got ${typeof nodes}`;
+      console.error('❌ [HTML Export]', error);
+      throw new Error(error);
+    }
+    if (!Array.isArray(edges)) {
+      const error = `Edges must be an array, got ${typeof edges}`;
+      console.error('❌ [HTML Export]', error);
+      throw new Error(error);
+    }
 
-  // Generate the HTML content
-  const htmlContent = generateHTMLTemplate(diagramData, diagramTitle, timestamp);
+    const timestamp = new Date().toISOString().split('T')[0];
+    const filename = `${diagramTitle.replace(/[^a-z0-9]/gi, '-').toLowerCase()}-${timestamp}.html`;
+    console.log('📝 [HTML Export] Generated filename:', filename);
 
-  // Create and download the file
-  downloadFile(htmlContent, filename);
+    // Serialize the diagram data
+    console.log('🔄 [HTML Export] Serializing diagram data...');
+    let diagramData;
+    try {
+      diagramData = {
+        nodes: nodes.map((node, index) => {
+          if (!node) {
+            throw new Error(`Node at index ${index} is null or undefined`);
+          }
+          if (!node.id) {
+            throw new Error(`Node at index ${index} is missing id`);
+          }
+          return {
+            id: node.id,
+            type: node.type || 'default',
+            position: node.position || { x: 0, y: 0 },
+            data: {
+              label: node.data?.label || 'Untitled',
+              color: node.data?.color || '#6b7280',
+              description: node.data?.description || '',
+            },
+          };
+        }),
+        edges: edges.map((edge, index) => {
+          if (!edge) {
+            throw new Error(`Edge at index ${index} is null or undefined`);
+          }
+          if (!edge.id) {
+            throw new Error(`Edge at index ${index} is missing id`);
+          }
+          return {
+            id: edge.id,
+            source: edge.source,
+            target: edge.target,
+            type: edge.type || 'default',
+            label: edge.label || '',
+            data: edge.data || {},
+          };
+        }),
+      };
+    } catch (serializationError) {
+      console.error('❌ [HTML Export] Error during serialization:', serializationError);
+      console.error('❌ [HTML Export] Sample node:', nodes[0]);
+      console.error('❌ [HTML Export] Sample edge:', edges[0]);
+      throw new Error(`Failed to serialize diagram data: ${serializationError.message}`);
+    }
+    console.log('✅ [HTML Export] Data serialized successfully:', {
+      nodes: diagramData.nodes.length,
+      edges: diagramData.edges.length
+    });
 
-  return filename;
+    // Generate the HTML content
+    console.log('🏗️ [HTML Export] Generating HTML template...');
+    let htmlContent;
+    try {
+      htmlContent = generateHTMLTemplate(diagramData, diagramTitle, timestamp);
+      if (!htmlContent || typeof htmlContent !== 'string') {
+        throw new Error('HTML template generation returned invalid content');
+      }
+      console.log('✅ [HTML Export] HTML template generated, size:', htmlContent.length, 'bytes');
+    } catch (templateError) {
+      console.error('❌ [HTML Export] Error generating template:', templateError);
+      throw new Error(`Failed to generate HTML template: ${templateError.message}`);
+    }
+
+    // Create and download the file
+    console.log('💾 [HTML Export] Initiating download...');
+    try {
+      downloadFile(htmlContent, filename);
+      console.log('✅ [HTML Export] Download initiated successfully');
+    } catch (downloadError) {
+      console.error('❌ [HTML Export] Error during download:', downloadError);
+      throw new Error(`Failed to download file: ${downloadError.message}`);
+    }
+
+    return filename;
+  } catch (error) {
+    console.error('❌ [HTML Export] Export failed:', error);
+    console.error('❌ [HTML Export] Error type:', error.constructor.name);
+    console.error('❌ [HTML Export] Error message:', error.message);
+    console.error('❌ [HTML Export] Error stack:', error.stack);
+    // Re-throw with more context
+    throw new Error(`HTML Export Failed: ${error.message}`);
+  }
 };
 
 const generateHTMLTemplate = (diagramData, title, timestamp) => {
@@ -442,13 +532,38 @@ const generateHTMLTemplate = (diagramData, title, timestamp) => {
 };
 
 const downloadFile = (content, filename) => {
-  const blob = new Blob([content], { type: 'text/html' });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = filename;
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  URL.revokeObjectURL(url);
+  try {
+    console.log('📦 [Download] Creating blob...');
+    const blob = new Blob([content], { type: 'text/html' });
+    console.log('✅ [Download] Blob created, size:', blob.size, 'bytes');
+
+    console.log('🔗 [Download] Creating object URL...');
+    const url = URL.createObjectURL(blob);
+    console.log('✅ [Download] Object URL created:', url);
+
+    console.log('🔗 [Download] Creating download link...');
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    console.log('✅ [Download] Link configured:', { href: url, download: filename });
+
+    console.log('📎 [Download] Appending link to document...');
+    document.body.appendChild(link);
+
+    console.log('🖱️ [Download] Triggering click...');
+    link.click();
+    console.log('✅ [Download] Click triggered');
+
+    console.log('🧹 [Download] Cleaning up...');
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    console.log('✅ [Download] Cleanup complete');
+  } catch (error) {
+    console.error('❌ [Download] Download failed:', error);
+    console.error('❌ [Download] Error details:', {
+      message: error.message,
+      stack: error.stack
+    });
+    throw error;
+  }
 };
