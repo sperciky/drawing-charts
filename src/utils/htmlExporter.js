@@ -388,6 +388,8 @@ const generateHTMLTemplate = (diagramData, title, timestamp) => {
 
     // Custom Edge Component
     const CustomEdge = (props) => {
+      console.log('🔵 CustomEdge called!', props);
+
       try {
         const {
           id,
@@ -403,11 +405,15 @@ const generateHTMLTemplate = (diagramData, title, timestamp) => {
           style = {}
         } = props;
 
+        console.log('🔵 Positions:', { sourceX, sourceY, targetX, targetY });
+
         const { BaseEdge, EdgeLabelRenderer, getSmoothStepPath, getBezierPath, getStraightPath } = window.ReactFlow;
 
         const directionType = data.directionType || 'unidirectional';
         const edgeType = data.type || 'smoothstep';
         const edgeLabel = data.label || label || '';
+
+        console.log('🔵 Edge config:', { directionType, edgeType, edgeLabel });
 
         // Get the path calculation function
         let getPath = getSmoothStepPath;
@@ -501,7 +507,9 @@ const generateHTMLTemplate = (diagramData, title, timestamp) => {
           targetPosition,
         });
 
-        return React.createElement('g', { className: 'react-flow__edge' }, [
+        console.log('🔵 Generated path:', edgePath, 'label position:', labelX, labelY);
+
+        const result = React.createElement('g', { className: 'react-flow__edge' }, [
           React.createElement('path', {
             key: 'path',
             id: id,
@@ -529,8 +537,11 @@ const generateHTMLTemplate = (diagramData, title, timestamp) => {
             }, edgeLabel)
           )
         ]);
+
+        console.log('🔵 Returning edge element:', result);
+        return result;
       } catch (error) {
-        console.error('CustomEdge error:', error);
+        console.error('❌ CustomEdge error:', error, error.stack);
         return null;
       }
     };
