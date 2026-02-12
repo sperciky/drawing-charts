@@ -48,6 +48,7 @@ const Toolbar = ({
   }, []);
 
   const exportFormats = [
+    { label: 'Export as HTML (Shareable)', value: 'html' },
     { label: 'Export as PNG', value: 'png' },
     { label: 'Export as JPG', value: 'jpg' },
     { label: 'Export as SVG', value: 'svg' },
