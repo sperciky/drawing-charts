@@ -398,7 +398,7 @@ const generateHTMLTemplate = (diagramData, title, timestamp) => {
       // Return a simple SVG path
       return React.createElement('path', {
         id: id,
-        d: `M ${sourceX} ${sourceY} L ${targetX} ${targetY}`,
+        d: 'M ' + sourceX + ' ' + sourceY + ' L ' + targetX + ' ' + targetY,
         stroke: 'red',
         strokeWidth: 10,
         fill: 'none',
