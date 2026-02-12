@@ -511,6 +511,14 @@ const generateHTMLTemplate = (diagramData, title, timestamp) => {
       const [nodes, setNodes] = useState(DIAGRAM_DATA.nodes);
       const [edges, setEdges] = useState(DIAGRAM_DATA.edges);
 
+      // Debug logging
+      console.log('📊 [Diagram Viewer] Initializing...', {
+        nodeCount: nodes?.length || 0,
+        edgeCount: edges?.length || 0,
+        sampleNode: nodes?.[0],
+        sampleEdge: edges?.[0]
+      });
+
       const nodeTypes = {
         platform: CustomNode,
         custom: CustomNode,
@@ -539,6 +547,10 @@ const generateHTMLTemplate = (diagramData, title, timestamp) => {
             edgesFocusable: false,
             panOnDrag: true,
             zoomOnScroll: true,
+            defaultEdgeOptions: {
+              type: 'custom',
+              animated: false,
+            },
             zoomOnPinch: true,
             zoomOnDoubleClick: true,
           }, [
