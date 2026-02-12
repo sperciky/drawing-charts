@@ -387,6 +387,17 @@ const generateHTMLTemplate = (diagramData, title, timestamp) => {
     };
 
     // Custom Edge Component
+    // Simple test edge to verify ReactFlow can call our component
+    const TestEdge = (props) => {
+      console.log('🟢 TEST EDGE CALLED!!!', props);
+      return React.createElement('path', {
+        d: 'M 0 0 L 100 100',
+        stroke: 'red',
+        strokeWidth: 5,
+        fill: 'none'
+      });
+    };
+
     const CustomEdge = (props) => {
       console.log('🔵 CustomEdge called!', props);
 
@@ -565,8 +576,16 @@ const generateHTMLTemplate = (diagramData, title, timestamp) => {
       };
 
       const edgeTypes = {
-        custom: CustomEdge,
+        custom: TestEdge,  // Using simple test edge first
+        test: TestEdge,
       };
+
+      console.log('🔧 [Diagram Viewer] Types registered:', {
+        nodeTypes: Object.keys(nodeTypes),
+        edgeTypes: Object.keys(edgeTypes),
+        CustomEdge: typeof CustomEdge,
+        CustomEdgeIsFunction: typeof CustomEdge === 'function'
+      });
 
       return React.createElement('div', { style: { width: '100%', height: '100%', display: 'flex', flexDirection: 'column' } }, [
         React.createElement('div', { className: 'header', key: 'header' }, [
