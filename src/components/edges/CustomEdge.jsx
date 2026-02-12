@@ -157,45 +157,29 @@ const CustomEdge = ({
     debugLog('📦 Will Render Request Box?', requestParameters.length > 0);
     debugLog('📦 Will Render Response Box?', responseParameters.length > 0);
 
-    const requestMarker = {
-      type: MarkerType.ArrowClosed,
-      width: 20,
-      height: 20,
-      color: '#3b82f6', // blue
-    };
-
-    const responseMarker = {
-      type: MarkerType.ArrowClosed,
-      width: 20,
-      height: 20,
-      color: '#10b981', // green
-    };
-
     debugLog('🚀 About to render bidirectional components');
 
     return (
       <>
         {/* Request Line - Blue, Solid, Arrow to Target */}
-        <BaseEdge
-          path={requestPath}
-          markerEnd={requestMarker}
-          style={{
-            ...style,
-            strokeWidth: selected ? 3 : 2,
-            stroke: '#3b82f6', // blue
-          }}
+        <path
+          d={requestPath}
+          fill="none"
+          stroke="#3b82f6"
+          strokeWidth={selected ? 3 : 2}
+          markerEnd="url(#arrow-blue)"
+          className="react-flow__edge-path"
         />
 
         {/* Response Line - Green, Dashed, Arrow FROM target TO source */}
-        <BaseEdge
-          path={responsePath}
-          markerEnd={responseMarker}
-          style={{
-            ...style,
-            strokeWidth: selected ? 3 : 2,
-            stroke: '#10b981', // green
-            strokeDasharray: '5,5',
-          }}
+        <path
+          d={responsePath}
+          fill="none"
+          stroke="#10b981"
+          strokeWidth={selected ? 3 : 2}
+          strokeDasharray="5,5"
+          markerEnd="url(#arrow-green)"
+          className="react-flow__edge-path"
         />
 
         {/* Reconnection handles for bidirectional edges - visual indicators only */}
@@ -331,13 +315,6 @@ const CustomEdge = ({
   // UNIDIRECTIONAL: Single line with one arrow, but can still show parameter boxes
   const [edgePath, labelX, labelY] = getPath(sourceX, sourceY, targetX, targetY, sourcePosition, targetPosition);
 
-  const marker = {
-    type: MarkerType.ArrowClosed,
-    width: 20,
-    height: 20,
-    color: '#6b7280',
-  };
-
   const hasParameters = requestParameters.length > 0 || responseParameters.length > 0;
   const showLabel = label || !hasParameters;
 
@@ -372,14 +349,13 @@ const CustomEdge = ({
 
   return (
     <>
-      <BaseEdge
-        path={edgePath}
-        markerEnd={marker}
-        style={{
-          ...style,
-          strokeWidth: selected ? 3 : 2,
-          stroke: '#6b7280',
-        }}
+      <path
+        d={edgePath}
+        fill="none"
+        stroke="#6b7280"
+        strokeWidth={selected ? 3 : 2}
+        markerEnd="url(#arrow-gray)"
+        className="react-flow__edge-path"
       />
 
       {/* Reconnection handles */}

@@ -684,6 +684,65 @@ function App() {
                 },
               }}
             >
+              {/* SVG Marker Definitions for Arrows */}
+              <svg style={{ position: 'absolute', width: 0, height: 0 }}>
+                <defs>
+                  {/* Blue arrow for request (unidirectional and bidirectional) */}
+                  <marker
+                    id="arrow-blue"
+                    viewBox="0 0 20 20"
+                    refX="18"
+                    refY="10"
+                    markerWidth="20"
+                    markerHeight="20"
+                    orient="auto"
+                  >
+                    <path
+                      d="M 0 0 L 20 10 L 0 20 L 5 10 Z"
+                      fill="#3b82f6"
+                      stroke="#ffffff"
+                      strokeWidth="1"
+                    />
+                  </marker>
+
+                  {/* Green arrow for response (bidirectional) */}
+                  <marker
+                    id="arrow-green"
+                    viewBox="0 0 20 20"
+                    refX="18"
+                    refY="10"
+                    markerWidth="20"
+                    markerHeight="20"
+                    orient="auto"
+                  >
+                    <path
+                      d="M 0 0 L 20 10 L 0 20 L 5 10 Z"
+                      fill="#10b981"
+                      stroke="#ffffff"
+                      strokeWidth="1"
+                    />
+                  </marker>
+
+                  {/* Gray arrow for unidirectional connections */}
+                  <marker
+                    id="arrow-gray"
+                    viewBox="0 0 20 20"
+                    refX="18"
+                    refY="10"
+                    markerWidth="20"
+                    markerHeight="20"
+                    orient="auto"
+                  >
+                    <path
+                      d="M 0 0 L 20 10 L 0 20 L 5 10 Z"
+                      fill="#6b7280"
+                      stroke="#ffffff"
+                      strokeWidth="1"
+                    />
+                  </marker>
+                </defs>
+              </svg>
+
               <Background color="#aaa" gap={16} />
               <Controls />
               {showMiniMap && (
