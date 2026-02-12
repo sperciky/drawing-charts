@@ -509,8 +509,12 @@ const generateHTMLTemplate = (diagramData, title, timestamp) => {
         const directionType = data.directionType || 'unidirectional';
         const edgeType = data.type || 'smoothstep';
         const edgeLabel = data.label || label || '';
+        const requestLabel = data.requestLabel || 'request';
+        const responseLabel = data.responseLabel || 'response';
+        const requestParameters = data.requestParameters || [];
+        const responseParameters = data.responseParameters || [];
 
-        console.log('🔵 Edge config:', { directionType, edgeType, edgeLabel });
+        console.log('🔵 Edge config:', { directionType, edgeType, edgeLabel, requestParameters, responseParameters });
 
         // Get the path calculation function
         let getPath = getSmoothStepPath;
@@ -554,7 +558,7 @@ const generateHTMLTemplate = (diagramData, title, timestamp) => {
           const labelX = (sourceX + targetX) / 2;
           const labelY = (sourceY + targetY) / 2;
 
-          return React.createElement('g', { className: 'react-flow__edge' }, [
+          const elements = [
             React.createElement('path', {
               key: 'request',
               id: id + '-request',
@@ -575,23 +579,146 @@ const generateHTMLTemplate = (diagramData, title, timestamp) => {
               strokeDasharray: '5,5',
               markerEnd: 'url(#arrow-green)',
               className: 'react-flow__edge-path'
-            }),
-            edgeLabel && React.createElement(EdgeLabelRenderer, { key: 'label' },
-              React.createElement('div', {
-                className: 'edge-label',
-                style: {
-                  position: 'absolute',
-                  transform: 'translate(-50%, -50%) translate(' + labelX + 'px, ' + labelY + 'px)',
-                  background: '#fff',
-                  padding: '4px 8px',
-                  borderRadius: '4px',
-                  fontSize: '12px',
-                  border: '1px solid #ccc',
-                  pointerEvents: 'all',
-                }
-              }, edgeLabel)
-            )
-          ]);
+            })
+          ];
+
+          // Add request parameter box if present
+          if (requestParameters.length > 0) {
+            elements.push(
+              React.createElement(EdgeLabelRenderer, { key: 'request-params' },
+                React.createElement('div', {
+                  className: 'nodrag nopan',
+                  style: {
+                    position: 'absolute',
+                    transform: 'translate(-50%, -50%) translate(' + labelX + 'px, ' + (labelY - 40) + 'px)',
+                    pointerEvents: 'all',
+                  }
+                },
+                  React.createElement('div', {
+                    style: {
+                      padding: '8px 12px',
+                      background: '#eff6ff',
+                      border: '2px solid #3b82f6',
+                      borderRadius: '8px',
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                      fontSize: '12px',
+                      fontWeight: '500',
+                      color: '#1e3a8a',
+                    }
+                  }, [
+                    React.createElement('div', {
+                      key: 'header',
+                      style: { display: 'flex', alignItems: 'center', gap: '4px', fontWeight: '600', marginBottom: '4px' }
+                    }, [
+                      React.createElement('span', { key: 'arrow', style: { fontSize: '16px' } }, '→'),
+                      React.createElement('span', { key: 'label' }, requestLabel)
+                    ]),
+                    React.createElement('div', {
+                      key: 'divider',
+                      style: {
+                        marginTop: '6px',
+                        paddingTop: '6px',
+                        borderTop: '1px solid rgba(59, 130, 246, 0.2)'
+                      }
+                    }, [
+                      React.createElement('div', {
+                        key: 'params-label',
+                        style: {
+                          fontSize: '10px',
+                          opacity: 0.6,
+                          marginBottom: '2px',
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.5px'
+                        }
+                      }, 'Parameters'),
+                      React.createElement('div', {
+                        key: 'params-list',
+                        style: { fontFamily: 'monospace', fontSize: '12px', opacity: 0.9, lineHeight: '1.6' }
+                      }, requestParameters.map((param, idx) =>
+                        React.createElement('div', {
+                          key: idx,
+                          style: { display: 'flex', alignItems: 'center', gap: '4px' }
+                        }, [
+                          React.createElement('span', { key: 'bullet', style: { opacity: 0.5 } }, '•'),
+                          React.createElement('span', { key: 'param', style: { fontWeight: '600' } }, param)
+                        ])
+                      ))
+                    ])
+                  ])
+                )
+              )
+            );
+          }
+
+          // Add response parameter box if present
+          if (responseParameters.length > 0) {
+            elements.push(
+              React.createElement(EdgeLabelRenderer, { key: 'response-params' },
+                React.createElement('div', {
+                  className: 'nodrag nopan',
+                  style: {
+                    position: 'absolute',
+                    transform: 'translate(-50%, -50%) translate(' + labelX + 'px, ' + (labelY + 40) + 'px)',
+                    pointerEvents: 'all',
+                  }
+                },
+                  React.createElement('div', {
+                    style: {
+                      padding: '8px 12px',
+                      background: '#f0fdf4',
+                      border: '2px solid #10b981',
+                      borderRadius: '8px',
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                      fontSize: '12px',
+                      fontWeight: '500',
+                      color: '#064e3b',
+                    }
+                  }, [
+                    React.createElement('div', {
+                      key: 'header',
+                      style: { display: 'flex', alignItems: 'center', gap: '4px', fontWeight: '600', marginBottom: '4px' }
+                    }, [
+                      React.createElement('span', { key: 'arrow', style: { fontSize: '16px' } }, '←'),
+                      React.createElement('span', { key: 'label' }, responseLabel)
+                    ]),
+                    React.createElement('div', {
+                      key: 'divider',
+                      style: {
+                        marginTop: '6px',
+                        paddingTop: '6px',
+                        borderTop: '1px solid rgba(16, 185, 129, 0.2)'
+                      }
+                    }, [
+                      React.createElement('div', {
+                        key: 'params-label',
+                        style: {
+                          fontSize: '10px',
+                          opacity: 0.6,
+                          marginBottom: '2px',
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.5px'
+                        }
+                      }, 'Parameters'),
+                      React.createElement('div', {
+                        key: 'params-list',
+                        style: { fontFamily: 'monospace', fontSize: '12px', opacity: 0.9, lineHeight: '1.6' }
+                      }, responseParameters.map((param, idx) =>
+                        React.createElement('div', {
+                          key: idx,
+                          style: { display: 'flex', alignItems: 'center', gap: '4px' }
+                        }, [
+                          React.createElement('span', { key: 'bullet', style: { opacity: 0.5 } }, '•'),
+                          React.createElement('span', { key: 'param', style: { fontWeight: '600' } }, param)
+                        ])
+                      ))
+                    ])
+                  ])
+                )
+              )
+            );
+          }
+
+          return React.createElement('g', { className: 'react-flow__edge' }, elements);
         }
 
         // Unidirectional
@@ -606,7 +733,7 @@ const generateHTMLTemplate = (diagramData, title, timestamp) => {
 
         console.log('🔵 Generated path:', edgePath, 'label position:', labelX, labelY);
 
-        const result = React.createElement('g', { className: 'react-flow__edge' }, [
+        const elements = [
           React.createElement('path', {
             key: 'path',
             id: id,
@@ -617,23 +744,168 @@ const generateHTMLTemplate = (diagramData, title, timestamp) => {
             markerEnd: 'url(#arrow-gray)',
             className: 'react-flow__edge-path',
             ...style
-          }),
-          edgeLabel && React.createElement(EdgeLabelRenderer, { key: 'label' },
-            React.createElement('div', {
-              className: 'edge-label',
-              style: {
-                position: 'absolute',
-                transform: 'translate(-50%, -50%) translate(' + labelX + 'px, ' + labelY + 'px)',
-                background: '#fff',
-                padding: '4px 8px',
-                borderRadius: '4px',
-                fontSize: '12px',
-                border: '1px solid #ccc',
-                pointerEvents: 'all',
-              }
-            }, edgeLabel)
-          )
-        ]);
+          })
+        ];
+
+        // Add label if present and no parameters (or add parameters separately)
+        const hasParameters = requestParameters.length > 0 || responseParameters.length > 0;
+        if (edgeLabel && !hasParameters) {
+          elements.push(
+            React.createElement(EdgeLabelRenderer, { key: 'label' },
+              React.createElement('div', {
+                className: 'edge-label',
+                style: {
+                  position: 'absolute',
+                  transform: 'translate(-50%, -50%) translate(' + labelX + 'px, ' + labelY + 'px)',
+                  background: '#fff',
+                  padding: '4px 8px',
+                  borderRadius: '4px',
+                  fontSize: '12px',
+                  border: '1px solid #ccc',
+                  pointerEvents: 'all',
+                }
+              }, edgeLabel)
+            )
+          );
+        }
+
+        // Add request parameter box if present
+        if (requestParameters.length > 0) {
+          elements.push(
+            React.createElement(EdgeLabelRenderer, { key: 'request-params' },
+              React.createElement('div', {
+                className: 'nodrag nopan',
+                style: {
+                  position: 'absolute',
+                  transform: 'translate(-50%, -50%) translate(' + labelX + 'px, ' + (labelY - 30) + 'px)',
+                  pointerEvents: 'all',
+                }
+              },
+                React.createElement('div', {
+                  style: {
+                    padding: '8px 12px',
+                    background: '#eff6ff',
+                    border: '2px solid #3b82f6',
+                    borderRadius: '8px',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                    fontSize: '12px',
+                    fontWeight: '500',
+                    color: '#1e3a8a',
+                  }
+                }, [
+                  React.createElement('div', {
+                    key: 'header',
+                    style: { display: 'flex', alignItems: 'center', gap: '4px', fontWeight: '600', marginBottom: '4px' }
+                  }, [
+                    React.createElement('span', { key: 'arrow', style: { fontSize: '16px' } }, '→'),
+                    React.createElement('span', { key: 'label' }, requestLabel)
+                  ]),
+                  React.createElement('div', {
+                    key: 'divider',
+                    style: {
+                      marginTop: '6px',
+                      paddingTop: '6px',
+                      borderTop: '1px solid rgba(59, 130, 246, 0.2)'
+                    }
+                  }, [
+                    React.createElement('div', {
+                      key: 'params-label',
+                      style: {
+                        fontSize: '10px',
+                        opacity: 0.6,
+                        marginBottom: '2px',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.5px'
+                      }
+                    }, 'Parameters'),
+                    React.createElement('div', {
+                      key: 'params-list',
+                      style: { fontFamily: 'monospace', fontSize: '12px', opacity: 0.9, lineHeight: '1.6' }
+                    }, requestParameters.map((param, idx) =>
+                      React.createElement('div', {
+                        key: idx,
+                        style: { display: 'flex', alignItems: 'center', gap: '4px' }
+                      }, [
+                        React.createElement('span', { key: 'bullet', style: { opacity: 0.5 } }, '•'),
+                        React.createElement('span', { key: 'param', style: { fontWeight: '600' } }, param)
+                      ])
+                    ))
+                  ])
+                ])
+              )
+            )
+          );
+        }
+
+        // Add response parameter box if present
+        if (responseParameters.length > 0) {
+          elements.push(
+            React.createElement(EdgeLabelRenderer, { key: 'response-params' },
+              React.createElement('div', {
+                className: 'nodrag nopan',
+                style: {
+                  position: 'absolute',
+                  transform: 'translate(-50%, -50%) translate(' + labelX + 'px, ' + (labelY + 30) + 'px)',
+                  pointerEvents: 'all',
+                }
+              },
+                React.createElement('div', {
+                  style: {
+                    padding: '8px 12px',
+                    background: '#f0fdf4',
+                    border: '2px solid #10b981',
+                    borderRadius: '8px',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                    fontSize: '12px',
+                    fontWeight: '500',
+                    color: '#064e3b',
+                  }
+                }, [
+                  React.createElement('div', {
+                    key: 'header',
+                    style: { display: 'flex', alignItems: 'center', gap: '4px', fontWeight: '600', marginBottom: '4px' }
+                  }, [
+                    React.createElement('span', { key: 'arrow', style: { fontSize: '16px' } }, '←'),
+                    React.createElement('span', { key: 'label' }, responseLabel)
+                  ]),
+                  React.createElement('div', {
+                    key: 'divider',
+                    style: {
+                      marginTop: '6px',
+                      paddingTop: '6px',
+                      borderTop: '1px solid rgba(16, 185, 129, 0.2)'
+                    }
+                  }, [
+                    React.createElement('div', {
+                      key: 'params-label',
+                      style: {
+                        fontSize: '10px',
+                        opacity: 0.6,
+                        marginBottom: '2px',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.5px'
+                      }
+                    }, 'Parameters'),
+                    React.createElement('div', {
+                      key: 'params-list',
+                      style: { fontFamily: 'monospace', fontSize: '12px', opacity: 0.9, lineHeight: '1.6' }
+                    }, responseParameters.map((param, idx) =>
+                      React.createElement('div', {
+                        key: idx,
+                        style: { display: 'flex', alignItems: 'center', gap: '4px' }
+                      }, [
+                        React.createElement('span', { key: 'bullet', style: { opacity: 0.5 } }, '•'),
+                        React.createElement('span', { key: 'param', style: { fontWeight: '600' } }, param)
+                      ])
+                    ))
+                  ])
+                ])
+              )
+            )
+          );
+        }
+
+        const result = React.createElement('g', { className: 'react-flow__edge' }, elements);
 
         console.log('🔵 Returning edge element:', result);
         return result;
