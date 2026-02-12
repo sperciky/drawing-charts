@@ -40,6 +40,9 @@ const edgeTypes = {
 };
 
 function App() {
+  // Test console logging
+  console.log('🟢 [App] Component mounted/rendered', new Date().toISOString());
+
   const reactFlowWrapper = useRef(null);
   const reactFlowRef = useRef(null);
 
@@ -555,21 +558,45 @@ function App() {
   const handleExport = useCallback(
     async (format) => {
       console.log('🎯 [App] handleExport called with format:', format);
+      console.log('🎯 [App] Current state:', {
+        nodeCount: nodes?.length,
+        edgeCount: edges?.length,
+        format
+      });
+
+      // Validation for HTML export
+      if (format === 'html') {
+        if (!nodes || nodes.length === 0) {
+          const errorMsg = 'Cannot export: No nodes in diagram';
+          console.error('❌ [App]', errorMsg);
+          await electronAPI.showMessage('Export Failed', errorMsg, 'error');
+          return;
+        }
+      }
 
       if (['png', 'jpg', 'svg', 'pdf', 'html'].includes(format)) {
         console.log('📤 [App] Calling exportImage with format:', format);
-        const result = await exportImage(format);
-        console.log('📥 [App] exportImage result:', result);
 
-        if (result.success) {
-          const message = format === 'html'
-            ? `Shareable HTML file downloaded: ${result.filename}`
-            : `Diagram exported as ${format.toUpperCase()}`;
-          await electronAPI.showMessage('Export Successful', message);
-          console.log('✅ [App] Export successful:', message);
-        } else {
-          await electronAPI.showMessage('Export Failed', result.error || 'Unknown error', 'error');
-          console.error('❌ [App] Export failed:', result.error);
+        try {
+          const result = await exportImage(format);
+          console.log('📥 [App] exportImage result:', result);
+
+          if (result.success) {
+            const message = format === 'html'
+              ? `Shareable HTML file downloaded: ${result.filename}`
+              : `Diagram exported as ${format.toUpperCase()}`;
+            await electronAPI.showMessage('Export Successful', message);
+            console.log('✅ [App] Export successful:', message);
+          } else {
+            const errorMessage = result.error || 'Unknown error - check console for details';
+            console.error('❌ [App] Export failed with error:', errorMessage);
+            console.error('❌ [App] Full result object:', JSON.stringify(result, null, 2));
+            await electronAPI.showMessage('Export Failed', errorMessage, 'error');
+          }
+        } catch (error) {
+          console.error('❌ [App] Exception during export:', error);
+          console.error('❌ [App] Exception stack:', error.stack);
+          await electronAPI.showMessage('Export Failed', `Exception: ${error.message}`, 'error');
         }
       } else if (format === 'xml') {
         console.log('📤 [App] Calling exportFile with XML format');
