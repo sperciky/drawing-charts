@@ -41,10 +41,12 @@ export const exportToHTML = (nodes, edges, diagramTitle = 'Diagram') => {
     const filename = `${diagramTitle.replace(/[^a-z0-9]/gi, '-').toLowerCase()}-${timestamp}.html`;
     console.log('📝 [HTML Export] Generated filename:', filename);
 
-    // Serialize the diagram data
-    console.log('🔄 [HTML Export] Serializing diagram data...');
+    // Serialize the diagram data - export COMPLETE data structure
+    console.log('🔄 [HTML Export] Serializing diagram data (full export)...');
     let diagramData;
     try {
+      // Export the complete nodes and edges as-is, preserving all data
+      // This ensures colors, labels, parameters, and all custom data are preserved
       diagramData = {
         nodes: nodes.map((node, index) => {
           if (!node) {
@@ -53,15 +55,13 @@ export const exportToHTML = (nodes, edges, diagramTitle = 'Diagram') => {
           if (!node.id) {
             throw new Error(`Node at index ${index} is missing id`);
           }
+          // Return the complete node object with all its data
           return {
-            id: node.id,
-            type: node.type || 'default',
+            ...node,
+            // Ensure essential fields have defaults
+            type: node.type || 'platform',
             position: node.position || { x: 0, y: 0 },
-            data: {
-              label: node.data?.label || 'Untitled',
-              color: node.data?.color || '#6b7280',
-              description: node.data?.description || '',
-            },
+            data: node.data || {},
           };
         }),
         edges: edges.map((edge, index) => {
@@ -71,12 +71,11 @@ export const exportToHTML = (nodes, edges, diagramTitle = 'Diagram') => {
           if (!edge.id) {
             throw new Error(`Edge at index ${index} is missing id`);
           }
+          // Return the complete edge object with all its data
           return {
-            id: edge.id,
-            source: edge.source,
-            target: edge.target,
-            type: edge.type || 'default',
-            label: edge.label || '',
+            ...edge,
+            // Ensure essential fields have defaults
+            type: edge.type || 'custom',
             data: edge.data || {},
           };
         }),
