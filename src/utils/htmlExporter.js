@@ -387,26 +387,22 @@ const generateHTMLTemplate = (diagramData, title, timestamp) => {
     };
 
     // Custom Edge Component
-    // Simple test edge using BaseEdge
+    // Ultra simple test - just return a red line
     const TestEdge = (props) => {
       console.log('🟢 TEST EDGE CALLED!!!', props);
 
-      const { BaseEdge, getSmoothStepPath } = window.ReactFlow;
-      const { id, sourceX, sourceY, targetX, targetY, sourcePosition, targetPosition } = props;
+      const { id, sourceX, sourceY, targetX, targetY } = props;
 
-      const [edgePath] = getSmoothStepPath({
-        sourceX,
-        sourceY,
-        targetX,
-        targetY,
-        sourcePosition,
-        targetPosition,
-      });
+      console.log('🟢 Edge positions:', { sourceX, sourceY, targetX, targetY });
 
-      return React.createElement(BaseEdge, {
+      // Return a simple SVG path
+      return React.createElement('path', {
         id: id,
-        path: edgePath,
-        style: { stroke: 'red', strokeWidth: 5 }
+        d: `M ${sourceX} ${sourceY} L ${targetX} ${targetY}`,
+        stroke: 'red',
+        strokeWidth: 10,
+        fill: 'none',
+        className: 'react-flow__edge-path'
       });
     };
 
@@ -622,8 +618,10 @@ const generateHTMLTemplate = (diagramData, title, timestamp) => {
               type: 'custom',
               animated: false,
             },
-            onError: (error) => {
-              console.error('❌ ReactFlow Error:', error);
+            onError: (code, message) => {
+              console.error('❌ ReactFlow Error Code:', code);
+              console.error('❌ ReactFlow Error Message:', message);
+              console.error('❌ Full error:', { code, message });
             },
             zoomOnPinch: true,
             zoomOnDoubleClick: true,
