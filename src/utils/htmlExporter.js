@@ -387,14 +387,26 @@ const generateHTMLTemplate = (diagramData, title, timestamp) => {
     };
 
     // Custom Edge Component
-    // Simple test edge to verify ReactFlow can call our component
+    // Simple test edge using BaseEdge
     const TestEdge = (props) => {
       console.log('🟢 TEST EDGE CALLED!!!', props);
-      return React.createElement('path', {
-        d: 'M 0 0 L 100 100',
-        stroke: 'red',
-        strokeWidth: 5,
-        fill: 'none'
+
+      const { BaseEdge, getSmoothStepPath } = window.ReactFlow;
+      const { id, sourceX, sourceY, targetX, targetY, sourcePosition, targetPosition } = props;
+
+      const [edgePath] = getSmoothStepPath({
+        sourceX,
+        sourceY,
+        targetX,
+        targetY,
+        sourcePosition,
+        targetPosition,
+      });
+
+      return React.createElement(BaseEdge, {
+        id: id,
+        path: edgePath,
+        style: { stroke: 'red', strokeWidth: 5 }
       });
     };
 
@@ -609,6 +621,9 @@ const generateHTMLTemplate = (diagramData, title, timestamp) => {
             defaultEdgeOptions: {
               type: 'custom',
               animated: false,
+            },
+            onError: (error) => {
+              console.error('❌ ReactFlow Error:', error);
             },
             zoomOnPinch: true,
             zoomOnDoubleClick: true,
