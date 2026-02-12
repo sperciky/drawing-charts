@@ -37,7 +37,11 @@ export const exportToHTML = (nodes, edges, diagramTitle = 'Diagram') => {
       throw new Error(error);
     }
 
-    const timestamp = new Date().toISOString().split('T')[0];
+    // Create timestamp with date and time
+    const now = new Date();
+    const dateStr = now.toISOString().split('T')[0]; // YYYY-MM-DD
+    const timeStr = now.toTimeString().split(' ')[0].replace(/:/g, '-'); // HH-MM-SS
+    const timestamp = `${dateStr}_${timeStr}`;
     const filename = `${diagramTitle.replace(/[^a-z0-9]/gi, '-').toLowerCase()}-${timestamp}.html`;
     console.log('📝 [HTML Export] Generated filename:', filename);
 
@@ -658,8 +662,7 @@ const generateHTMLTemplate = (diagramData, title, timestamp) => {
       };
 
       const edgeTypes = {
-        custom: TestEdge,  // Using simple test edge first
-        test: TestEdge,
+        custom: CustomEdge,
       };
 
       console.log('🔧 [Diagram Viewer] Types registered:', {
