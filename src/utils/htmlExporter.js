@@ -192,27 +192,67 @@ const generateHTMLTemplate = (diagramData, title, timestamp) => {
     }
 
     .custom-node {
-      padding: 12px 20px;
-      border-radius: 8px;
-      border: 2px solid;
       background: white;
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-      min-width: 150px;
-      text-align: center;
+      border-radius: 8px;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      min-width: 250px;
+      min-height: 150px;
       cursor: default;
     }
 
-    .custom-node .label {
-      font-weight: 600;
-      font-size: 14px;
-      margin-bottom: 4px;
-      word-wrap: break-word;
+    .custom-node-header {
+      padding: 12px 16px;
+      border-radius: 8px 8px 0 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
 
-    .custom-node .description {
-      font-size: 12px;
+    .custom-node-header-icon {
+      width: 20px;
+      height: 20px;
+      color: white;
+      flex-shrink: 0;
+    }
+
+    .custom-node-header-title {
+      color: white;
+      font-weight: 600;
+      font-size: 16px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .custom-node-attributes {
+      padding: 12px 16px;
+    }
+
+    .custom-node-attribute {
+      display: flex;
+      align-items: start;
+      gap: 8px;
+      font-size: 14px;
+      margin-bottom: 8px;
+    }
+
+    .custom-node-attribute-key {
+      font-weight: 500;
+      color: #374151;
+      flex-shrink: 0;
+    }
+
+    .custom-node-attribute-value {
       color: #6b7280;
-      margin-top: 4px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .custom-node-empty {
+      padding: 24px 16px;
+      text-align: center;
+      color: #9ca3af;
+      font-size: 14px;
     }
 
     .react-flow__edge-path {
@@ -268,21 +308,82 @@ const generateHTMLTemplate = (diagramData, title, timestamp) => {
     const { ReactFlow, Background, Controls, MiniMap } = window.ReactFlow;
     const { useState, useCallback } = React;
 
-    // Custom Node Component
+    // Custom Node Component - matches PlatformNode
     const CustomNode = ({ data }) => {
+      const name = data.name || data.label || 'Untitled';
+      const color = data.color || '#6b7280';
+      const attributes = data.attributes || [];
+
+      const children = [];
+
+      // Header with colored background
+      children.push(
+        React.createElement('div', {
+          className: 'custom-node-header',
+          style: { backgroundColor: color },
+          key: 'header'
+        }, [
+          // Box icon (simple square)
+          React.createElement('svg', {
+            key: 'icon',
+            className: 'custom-node-header-icon',
+            viewBox: '0 0 24 24',
+            fill: 'none',
+            stroke: 'currentColor',
+            strokeWidth: '2'
+          }, [
+            React.createElement('rect', {
+              key: 'rect',
+              x: '3',
+              y: '3',
+              width: '18',
+              height: '18',
+              rx: '2',
+              ry: '2'
+            })
+          ]),
+          // Title
+          React.createElement('h3', {
+            key: 'title',
+            className: 'custom-node-header-title'
+          }, name)
+        ])
+      );
+
+      // Attributes
+      if (attributes.length > 0) {
+        children.push(
+          React.createElement('div', {
+            className: 'custom-node-attributes',
+            key: 'attributes'
+          }, attributes.map((attr, index) =>
+            React.createElement('div', {
+              className: 'custom-node-attribute',
+              key: attr.id || index
+            }, [
+              React.createElement('span', {
+                className: 'custom-node-attribute-key',
+                key: 'key'
+              }, attr.key + ':'),
+              React.createElement('span', {
+                className: 'custom-node-attribute-value',
+                key: 'value'
+              }, attr.value)
+            ])
+          ))
+        );
+      } else {
+        children.push(
+          React.createElement('div', {
+            className: 'custom-node-empty',
+            key: 'empty'
+          }, 'No attributes')
+        );
+      }
+
       return React.createElement('div', {
-        className: 'custom-node',
-        style: {
-          borderColor: data.color || '#6b7280',
-          backgroundColor: 'white',
-        }
-      }, [
-        React.createElement('div', { className: 'label', key: 'label' }, data.label),
-        data.description && React.createElement('div', {
-          className: 'description',
-          key: 'description'
-        }, data.description)
-      ]);
+        className: 'custom-node'
+      }, children);
     };
 
     // Custom Edge Component
@@ -411,6 +512,7 @@ const generateHTMLTemplate = (diagramData, title, timestamp) => {
       const [edges, setEdges] = useState(DIAGRAM_DATA.edges);
 
       const nodeTypes = {
+        platform: CustomNode,
         custom: CustomNode,
       };
 
