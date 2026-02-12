@@ -266,7 +266,7 @@ const generateHTMLTemplate = (diagramData, title, timestamp) => {
     const EXPORT_DATE = ${JSON.stringify(timestamp)};
 
     // React Flow viewer component
-    const { ReactFlow, Background, Controls, MiniMap } = ReactFlowRenderer;
+    const { ReactFlow, Background, Controls, MiniMap } = window.ReactFlow;
     const { useState, useCallback } = React;
 
     // Custom Node Component
@@ -299,7 +299,7 @@ const generateHTMLTemplate = (diagramData, title, timestamp) => {
       label,
       markerEnd
     }) => {
-      const { BaseEdge, EdgeLabelRenderer, getSmoothStepPath } = ReactFlowRenderer;
+      const { BaseEdge, EdgeLabelRenderer, getSmoothStepPath } = window.ReactFlow;
 
       const directionType = data?.directionType || 'unidirectional';
       const edgeType = data?.type || 'smoothstep';
@@ -307,11 +307,11 @@ const generateHTMLTemplate = (diagramData, title, timestamp) => {
       // Get the path calculation function
       let getPath = getSmoothStepPath;
       if (edgeType === 'straight') {
-        getPath = ReactFlowRenderer.getStraightPath;
+        getPath = window.ReactFlow.getStraightPath;
       } else if (edgeType === 'step') {
-        getPath = ReactFlowRenderer.getStepPath;
+        getPath = window.ReactFlow.getStepPath;
       } else if (edgeType === 'bezier') {
-        getPath = ReactFlowRenderer.getBezierPath;
+        getPath = window.ReactFlow.getBezierPath;
       }
 
       if (directionType === 'bidirectional') {
