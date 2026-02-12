@@ -585,7 +585,7 @@ function App() {
             const message = format === 'html'
               ? `Shareable HTML file downloaded: ${result.filename}`
               : `Diagram exported as ${format.toUpperCase()}`;
-            await electronAPI.showMessage('Export Successful', message);
+            // Success alert removed - silent export
             console.log('✅ [App] Export successful:', message);
           } else {
             const errorMessage = result.error || 'Unknown error - check console for details';
@@ -602,7 +602,7 @@ function App() {
         console.log('📤 [App] Calling exportFile with XML format');
         const result = await exportFile(nodes, edges, format);
         if (result.success) {
-          await electronAPI.showMessage('Export Successful', 'Diagram exported as XML');
+          // Success alert removed - silent export
           console.log('✅ [App] XML export successful');
         } else {
           await electronAPI.showMessage('Export Failed', result.error || 'Unknown error', 'error');
