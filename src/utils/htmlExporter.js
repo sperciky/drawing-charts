@@ -3,38 +3,67 @@
  */
 
 export const exportToHTML = (nodes, edges, diagramTitle = 'Diagram') => {
-  const timestamp = new Date().toISOString().split('T')[0];
-  const filename = `${diagramTitle.replace(/[^a-z0-9]/gi, '-').toLowerCase()}-${timestamp}.html`;
+  console.log('🚀 [HTML Export] Starting export process...');
+  console.log('📊 [HTML Export] Input:', {
+    nodeCount: nodes?.length || 0,
+    edgeCount: edges?.length || 0,
+    diagramTitle
+  });
 
-  // Serialize the diagram data
-  const diagramData = {
-    nodes: nodes.map(node => ({
-      id: node.id,
-      type: node.type,
-      position: node.position,
-      data: {
-        label: node.data.label,
-        color: node.data.color,
-        description: node.data.description,
-      },
-    })),
-    edges: edges.map(edge => ({
-      id: edge.id,
-      source: edge.source,
-      target: edge.target,
-      type: edge.type,
-      label: edge.label,
-      data: edge.data,
-    })),
-  };
+  try {
+    // Validate inputs
+    if (!nodes || !edges) {
+      console.error('❌ [HTML Export] Missing nodes or edges:', { nodes, edges });
+      throw new Error('Nodes and edges are required for export');
+    }
 
-  // Generate the HTML content
-  const htmlContent = generateHTMLTemplate(diagramData, diagramTitle, timestamp);
+    const timestamp = new Date().toISOString().split('T')[0];
+    const filename = `${diagramTitle.replace(/[^a-z0-9]/gi, '-').toLowerCase()}-${timestamp}.html`;
+    console.log('📝 [HTML Export] Generated filename:', filename);
 
-  // Create and download the file
-  downloadFile(htmlContent, filename);
+    // Serialize the diagram data
+    console.log('🔄 [HTML Export] Serializing diagram data...');
+    const diagramData = {
+      nodes: nodes.map(node => ({
+        id: node.id,
+        type: node.type,
+        position: node.position,
+        data: {
+          label: node.data.label,
+          color: node.data.color,
+          description: node.data.description,
+        },
+      })),
+      edges: edges.map(edge => ({
+        id: edge.id,
+        source: edge.source,
+        target: edge.target,
+        type: edge.type,
+        label: edge.label,
+        data: edge.data,
+      })),
+    };
+    console.log('✅ [HTML Export] Data serialized successfully:', {
+      nodes: diagramData.nodes.length,
+      edges: diagramData.edges.length
+    });
 
-  return filename;
+    // Generate the HTML content
+    console.log('🏗️ [HTML Export] Generating HTML template...');
+    const htmlContent = generateHTMLTemplate(diagramData, diagramTitle, timestamp);
+    console.log('✅ [HTML Export] HTML template generated, size:', htmlContent.length, 'bytes');
+
+    // Create and download the file
+    console.log('💾 [HTML Export] Initiating download...');
+    downloadFile(htmlContent, filename);
+    console.log('✅ [HTML Export] Download initiated successfully');
+
+    return filename;
+  } catch (error) {
+    console.error('❌ [HTML Export] Export failed:', error);
+    console.error('❌ [HTML Export] Error stack:', error.stack);
+    throw error;
+  }
 };
 
 const generateHTMLTemplate = (diagramData, title, timestamp) => {
@@ -442,13 +471,38 @@ const generateHTMLTemplate = (diagramData, title, timestamp) => {
 };
 
 const downloadFile = (content, filename) => {
-  const blob = new Blob([content], { type: 'text/html' });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = filename;
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  URL.revokeObjectURL(url);
+  try {
+    console.log('📦 [Download] Creating blob...');
+    const blob = new Blob([content], { type: 'text/html' });
+    console.log('✅ [Download] Blob created, size:', blob.size, 'bytes');
+
+    console.log('🔗 [Download] Creating object URL...');
+    const url = URL.createObjectURL(blob);
+    console.log('✅ [Download] Object URL created:', url);
+
+    console.log('🔗 [Download] Creating download link...');
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    console.log('✅ [Download] Link configured:', { href: url, download: filename });
+
+    console.log('📎 [Download] Appending link to document...');
+    document.body.appendChild(link);
+
+    console.log('🖱️ [Download] Triggering click...');
+    link.click();
+    console.log('✅ [Download] Click triggered');
+
+    console.log('🧹 [Download] Cleaning up...');
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    console.log('✅ [Download] Cleanup complete');
+  } catch (error) {
+    console.error('❌ [Download] Download failed:', error);
+    console.error('❌ [Download] Error details:', {
+      message: error.message,
+      stack: error.stack
+    });
+    throw error;
+  }
 };

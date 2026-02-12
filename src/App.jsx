@@ -554,20 +554,35 @@ function App() {
   // Export
   const handleExport = useCallback(
     async (format) => {
-      if (['png', 'jpg', 'svg', 'pdf'].includes(format)) {
+      console.log('🎯 [App] handleExport called with format:', format);
+
+      if (['png', 'jpg', 'svg', 'pdf', 'html'].includes(format)) {
+        console.log('📤 [App] Calling exportImage with format:', format);
         const result = await exportImage(format);
+        console.log('📥 [App] exportImage result:', result);
+
         if (result.success) {
-          await electronAPI.showMessage('Export Successful', `Diagram exported as ${format.toUpperCase()}`);
+          const message = format === 'html'
+            ? `Shareable HTML file downloaded: ${result.filename}`
+            : `Diagram exported as ${format.toUpperCase()}`;
+          await electronAPI.showMessage('Export Successful', message);
+          console.log('✅ [App] Export successful:', message);
         } else {
           await electronAPI.showMessage('Export Failed', result.error || 'Unknown error', 'error');
+          console.error('❌ [App] Export failed:', result.error);
         }
       } else if (format === 'xml') {
+        console.log('📤 [App] Calling exportFile with XML format');
         const result = await exportFile(nodes, edges, format);
         if (result.success) {
           await electronAPI.showMessage('Export Successful', 'Diagram exported as XML');
+          console.log('✅ [App] XML export successful');
         } else {
           await electronAPI.showMessage('Export Failed', result.error || 'Unknown error', 'error');
+          console.error('❌ [App] XML export failed:', result.error);
         }
+      } else {
+        console.error('❌ [App] Unknown export format:', format);
       }
     },
     [nodes, edges, exportImage, exportFile]
