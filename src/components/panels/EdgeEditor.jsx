@@ -247,6 +247,7 @@ const EdgeEditor = ({
                 icon={<Link2 size={14} />}
                 disabled={directionType === 'unidirectional'}
                 title={directionType === 'unidirectional' ? 'Source is fixed for unidirectional edges' : 'Reconnect where this edge starts'}
+                className="!bg-purple-50 !border-purple-300 !text-purple-700 hover:!bg-purple-100 disabled:!bg-gray-100 disabled:!border-gray-300 disabled:!text-gray-400"
               >
                 {directionType === 'unidirectional' ? 'Source Fixed' : 'Reconnect Source'}
               </Button>
@@ -256,6 +257,7 @@ const EdgeEditor = ({
                 size="sm"
                 icon={<Link2 size={14} />}
                 title="Reconnect where this edge points to"
+                className="!bg-blue-50 !border-blue-300 !text-blue-700 hover:!bg-blue-100"
               >
                 Reconnect Target
               </Button>
