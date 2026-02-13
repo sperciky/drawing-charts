@@ -184,6 +184,8 @@ function App() {
 
   // Handle node click
   const onNodeClick = useCallback((event, clickedNode) => {
+    console.log(`[SIMPLE LOG] User clicked on node ${clickedNode.id} (${clickedNode.data.name})`);
+
     console.log('🖱️ [DEBUG] onNodeClick FIRED!', {
       nodeId: clickedNode.id,
       nodeName: clickedNode.data.name,
@@ -256,12 +258,16 @@ function App() {
 
   // Handle edge click
   const onEdgeClick = useCallback((event, edge) => {
+    console.log(`[SIMPLE LOG] User clicked on edge ${edge.id} (${edge.source} → ${edge.target})`);
+
     setSelectedEdge(edge);
     setSelectedNode(null);
   }, []);
 
   // Handle pane click (deselect)
   const onPaneClick = useCallback((event) => {
+    console.log('[SIMPLE LOG] User clicked on empty canvas (pane)');
+
     console.log('🖱️ [DEBUG] onPaneClick FIRED!', {
       reconnectModeActive: !!reconnectMode,
       reconnectModeState: reconnectMode,
