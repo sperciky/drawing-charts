@@ -54,6 +54,7 @@ function App() {
   const [debugModeState, setDebugModeState] = useState(false);
   const [showMiniMap, setShowMiniMap] = useState(true);
   const [reconnectMode, setReconnectMode] = useState(null); // { edgeId, endpoint: 'source' | 'target', selectedHandle: 'top' | 'right' | 'bottom' | 'left' }
+  const [clickMarkers, setClickMarkers] = useState([]); // Array of { id, x, y, timestamp } for visualizing clicks
 
   // Reconnection mode handlers (defined early for use in other callbacks)
   const handleStartReconnection = useCallback((edgeId, endpoint, selectedHandle = null) => {
@@ -163,6 +164,9 @@ function App() {
       eventType: event.type
     });
 
+    // Visualize the click
+    addClickMarker(event);
+
     // If in reconnection mode, reconnect the edge
     if (reconnectMode) {
       const { edgeId, endpoint } = reconnectMode;
@@ -219,13 +223,45 @@ function App() {
 
     setSelectedNode(clickedNode);
     setSelectedEdge(null);
-  }, [reconnectMode, setEdges, nodes, edges, reactFlowWrapper]);
+  }, [reconnectMode, setEdges, nodes, edges, reactFlowWrapper, addClickMarker]);
 
   // Handle edge click
   const onEdgeClick = useCallback((event, edge) => {
     setSelectedEdge(edge);
     setSelectedNode(null);
   }, []);
+
+  // Visualize clicks with red dots
+  const addClickMarker = useCallback((event) => {
+    if (!reactFlowInstance) return;
+
+    // Get flow coordinates
+    const bounds = reactFlowWrapper.current?.getBoundingClientRect();
+    if (!bounds) return;
+
+    const position = reactFlowInstance.project({
+      x: event.clientX - bounds.left,
+      y: event.clientY - bounds.top,
+    });
+
+    const marker = {
+      id: Date.now(),
+      x: position.x,
+      y: position.y,
+      screenX: event.clientX,
+      screenY: event.clientY,
+      timestamp: new Date().toISOString()
+    };
+
+    console.log('🔴 [CLICK] Visualizing click at:', marker);
+
+    setClickMarkers(prev => [...prev, marker]);
+
+    // Remove marker after 3 seconds
+    setTimeout(() => {
+      setClickMarkers(prev => prev.filter(m => m.id !== marker.id));
+    }, 3000);
+  }, [reactFlowInstance]);
 
   // Handle pane click (deselect)
   const onPaneClick = useCallback((event) => {
@@ -236,6 +272,8 @@ function App() {
       eventType: event?.type
     });
 
+    addClickMarker(event);
+
     // Cancel reconnection mode if active
     if (reconnectMode) {
       handleCancelReconnection();
@@ -244,7 +282,7 @@ function App() {
 
     setSelectedNode(null);
     setSelectedEdge(null);
-  }, [reconnectMode, handleCancelReconnection]);
+  }, [reconnectMode, handleCancelReconnection, addClickMarker]);
 
   // Handle connection
   const onConnect = useCallback(
@@ -849,6 +887,29 @@ function App() {
                   pannable
                 />
               )}
+
+              {/* Click visualization markers */}
+              {clickMarkers.map((marker) => (
+                <div
+                  key={marker.id}
+                  style={{
+                    position: 'absolute',
+                    left: marker.x,
+                    top: marker.y,
+                    width: '12px',
+                    height: '12px',
+                    borderRadius: '50%',
+                    backgroundColor: 'red',
+                    border: '2px solid white',
+                    boxShadow: '0 0 4px rgba(0,0,0,0.5)',
+                    transform: 'translate(-50%, -50%)',
+                    pointerEvents: 'none',
+                    zIndex: 9999,
+                    animation: 'pulse 0.5s ease-in-out'
+                  }}
+                  title={`Click at (${Math.round(marker.x)}, ${Math.round(marker.y)}) - ${marker.timestamp}`}
+                />
+              ))}
             </ReactFlow>
           </div>
         </div>
