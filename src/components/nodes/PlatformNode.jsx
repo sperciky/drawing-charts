@@ -3,16 +3,20 @@ import { Handle, Position } from 'reactflow';
 import { Box } from 'lucide-react';
 
 const PlatformNode = ({ data, selected, id }) => {
-  const { name, color, attributes = [] } = data;
+  const { name, color, attributes = [], reconnectMode = false } = data;
 
   const handleDirectClick = (e) => {
     console.log('🎯 [DEBUG] PlatformNode direct click handler!', {
       nodeId: id,
       nodeName: name,
+      reconnectMode,
       target: e.target.className,
       currentTarget: e.currentTarget.className
     });
   };
+
+  // Disable handles during reconnection mode to allow node body clicks
+  const handleStyle = reconnectMode ? { pointerEvents: 'none' } : {};
 
   return (
     <div
@@ -29,14 +33,16 @@ const PlatformNode = ({ data, selected, id }) => {
         position={Position.Top}
         id="top-target"
         className="w-3 h-3 !bg-blue-500 border-2 border-white hover:w-4 hover:h-4 hover:!bg-blue-600 transition-all cursor-crosshair"
-        style={{ top: -6 }}
+        style={{ top: -6, ...handleStyle }}
+        isConnectable={!reconnectMode}
       />
       <Handle
         type="source"
         position={Position.Top}
         id="top-source"
         className="w-3 h-3 !bg-green-500 border-2 border-white hover:w-4 hover:h-4 hover:!bg-green-600 transition-all cursor-crosshair"
-        style={{ top: -6 }}
+        style={{ top: -6, ...handleStyle }}
+        isConnectable={!reconnectMode}
       />
 
       {/* Bottom handles */}
@@ -45,14 +51,16 @@ const PlatformNode = ({ data, selected, id }) => {
         position={Position.Bottom}
         id="bottom-target"
         className="w-3 h-3 !bg-blue-500 border-2 border-white hover:w-4 hover:h-4 hover:!bg-blue-600 transition-all cursor-crosshair"
-        style={{ bottom: -6 }}
+        style={{ bottom: -6, ...handleStyle }}
+        isConnectable={!reconnectMode}
       />
       <Handle
         type="source"
         position={Position.Bottom}
         id="bottom-source"
         className="w-3 h-3 !bg-green-500 border-2 border-white hover:w-4 hover:h-4 hover:!bg-green-600 transition-all cursor-crosshair"
-        style={{ bottom: -6 }}
+        style={{ bottom: -6, ...handleStyle }}
+        isConnectable={!reconnectMode}
       />
 
       {/* Left handles */}
@@ -61,14 +69,16 @@ const PlatformNode = ({ data, selected, id }) => {
         position={Position.Left}
         id="left-target"
         className="w-3 h-3 !bg-blue-500 border-2 border-white hover:w-4 hover:h-4 hover:!bg-blue-600 transition-all cursor-crosshair"
-        style={{ left: -6 }}
+        style={{ left: -6, ...handleStyle }}
+        isConnectable={!reconnectMode}
       />
       <Handle
         type="source"
         position={Position.Left}
         id="left-source"
         className="w-3 h-3 !bg-green-500 border-2 border-white hover:w-4 hover:h-4 hover:!bg-green-600 transition-all cursor-crosshair"
-        style={{ left: -6 }}
+        style={{ left: -6, ...handleStyle }}
+        isConnectable={!reconnectMode}
       />
 
       {/* Right handles */}
@@ -77,14 +87,16 @@ const PlatformNode = ({ data, selected, id }) => {
         position={Position.Right}
         id="right-target"
         className="w-3 h-3 !bg-blue-500 border-2 border-white hover:w-4 hover:h-4 hover:!bg-blue-600 transition-all cursor-crosshair"
-        style={{ right: -6 }}
+        style={{ right: -6, ...handleStyle }}
+        isConnectable={!reconnectMode}
       />
       <Handle
         type="source"
         position={Position.Right}
         id="right-source"
         className="w-3 h-3 !bg-green-500 border-2 border-white hover:w-4 hover:h-4 hover:!bg-green-600 transition-all cursor-crosshair"
-        style={{ right: -6 }}
+        style={{ right: -6, ...handleStyle }}
+        isConnectable={!reconnectMode}
       />
 
       {/* Header */}

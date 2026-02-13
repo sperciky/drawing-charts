@@ -89,6 +89,19 @@ function App() {
     });
   }, [reconnectMode]);
 
+  // Update all nodes with reconnectMode state so handles can be disabled
+  useEffect(() => {
+    setNodes((nds) =>
+      nds.map((node) => ({
+        ...node,
+        data: {
+          ...node.data,
+          reconnectMode: !!reconnectMode
+        }
+      }))
+    );
+  }, [reconnectMode, setNodes]);
+
   // Hooks
   const { pushState, undo, redo, canUndo, canRedo, reset } = useHistory({
     nodes: [],
@@ -748,7 +761,6 @@ function App() {
               nodeTypes={nodeTypes}
               edgeTypes={edgeTypes}
               edgeUpdaterRadius={0}
-              nodesConnectable={!reconnectMode}
               fitView
               snapToGrid
               snapGrid={[15, 15]}
