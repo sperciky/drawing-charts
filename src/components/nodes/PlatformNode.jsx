@@ -5,6 +5,11 @@ import { Box } from 'lucide-react';
 const PlatformNode = ({ data, selected, id }) => {
   const { name, color, attributes = [], reconnectMode = false } = data;
 
+  // Debug: Log when reconnectMode changes
+  if (reconnectMode) {
+    console.log(`🔵 [DEBUG] PlatformNode ${id} (${name}) rendered with reconnectMode=${reconnectMode}, handleStyle will be:`, reconnectMode ? { pointerEvents: 'none' } : {});
+  }
+
   const handleDirectClick = (e) => {
     console.log('🎯 [DEBUG] PlatformNode direct click handler!', {
       nodeId: id,
@@ -17,6 +22,8 @@ const PlatformNode = ({ data, selected, id }) => {
 
   // Disable handles during reconnection mode to allow node body clicks
   const handleStyle = reconnectMode ? { pointerEvents: 'none' } : {};
+
+  console.log(`🔷 [DEBUG] PlatformNode ${id} handleStyle:`, handleStyle);
 
   return (
     <div
