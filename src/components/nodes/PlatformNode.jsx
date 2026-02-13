@@ -2,11 +2,21 @@ import React, { memo } from 'react';
 import { Handle, Position } from 'reactflow';
 import { Box } from 'lucide-react';
 
-const PlatformNode = ({ data, selected }) => {
+const PlatformNode = ({ data, selected, id }) => {
   const { name, color, attributes = [] } = data;
+
+  const handleDirectClick = (e) => {
+    console.log('🎯 [DEBUG] PlatformNode direct click handler!', {
+      nodeId: id,
+      nodeName: name,
+      target: e.target.className,
+      currentTarget: e.currentTarget.className
+    });
+  };
 
   return (
     <div
+      onClick={handleDirectClick}
       className={`bg-white rounded-lg shadow-lg transition-all duration-200 min-w-[250px] ${
         selected ? 'ring-2 ring-blue-500 ring-offset-2' : ''
       }`}

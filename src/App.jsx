@@ -57,7 +57,9 @@ function App() {
 
   // Reconnection mode handlers (defined early for use in other callbacks)
   const handleStartReconnection = useCallback((edgeId, endpoint, selectedHandle = null) => {
-    setReconnectMode({ edgeId, endpoint, selectedHandle });
+    const newMode = { edgeId, endpoint, selectedHandle };
+    console.log('🔧 [DEBUG] Setting reconnectMode:', newMode);
+    setReconnectMode(newMode);
     if (selectedHandle) {
       console.log(`🔄 Reconnection mode: ${endpoint} of edge ${edgeId}, handle: ${selectedHandle.toUpperCase()}`);
       console.log('👆 Click on a node to complete reconnection');
@@ -77,6 +79,15 @@ function App() {
     setDebugModeState(enabled);
     setDebugMode(enabled); // Update global debug flag
   }, []);
+
+  // Debug: Track reconnectMode changes
+  useEffect(() => {
+    console.log('🔧 [DEBUG] reconnectMode state changed:', {
+      reconnectMode,
+      nodesConnectable: !reconnectMode,
+      timestamp: new Date().toISOString()
+    });
+  }, [reconnectMode]);
 
   // Hooks
   const { pushState, undo, redo, canUndo, canRedo, reset } = useHistory({
@@ -127,6 +138,15 @@ function App() {
 
   // Handle node click
   const onNodeClick = useCallback((event, clickedNode) => {
+    console.log('🖱️ [DEBUG] onNodeClick FIRED!', {
+      nodeId: clickedNode.id,
+      nodeName: clickedNode.data.name,
+      reconnectModeActive: !!reconnectMode,
+      reconnectModeState: reconnectMode,
+      eventTarget: event.target.className,
+      eventType: event.type
+    });
+
     // If in reconnection mode, reconnect the edge
     if (reconnectMode) {
       const { edgeId, endpoint } = reconnectMode;
@@ -192,7 +212,14 @@ function App() {
   }, []);
 
   // Handle pane click (deselect)
-  const onPaneClick = useCallback(() => {
+  const onPaneClick = useCallback((event) => {
+    console.log('🖱️ [DEBUG] onPaneClick FIRED!', {
+      reconnectModeActive: !!reconnectMode,
+      reconnectModeState: reconnectMode,
+      eventTarget: event?.target?.className,
+      eventType: event?.type
+    });
+
     // Cancel reconnection mode if active
     if (reconnectMode) {
       handleCancelReconnection();
@@ -696,6 +723,17 @@ function App() {
         {/* Canvas */}
         <div className="flex-1 relative" ref={reactFlowWrapper}>
           <div ref={reactFlowRef} className="w-full h-full">
+            {(() => {
+              const nodesConnectableValue = !reconnectMode;
+              console.log('🎨 [DEBUG] Rendering ReactFlow with:', {
+                nodesConnectable: nodesConnectableValue,
+                reconnectMode,
+                nodeCount: nodes.length,
+                edgeCount: edges.length,
+                onNodeClickDefined: !!onNodeClick
+              });
+              return null;
+            })()}
             <ReactFlow
               nodes={nodes}
               edges={edges}

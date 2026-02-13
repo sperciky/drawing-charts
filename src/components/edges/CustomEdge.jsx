@@ -161,45 +161,41 @@ const CustomEdge = ({
 
     return (
       <>
-        {/* Invisible wider paths for easier clicking */}
-        <path
-          d={requestPath}
-          fill="none"
-          stroke="transparent"
-          strokeWidth={20}
-          className="react-flow__edge-path"
-          style={{ cursor: 'pointer' }}
-        />
-        <path
-          d={responsePath}
-          fill="none"
-          stroke="transparent"
-          strokeWidth={20}
-          className="react-flow__edge-path"
-          style={{ cursor: 'pointer' }}
-        />
-
         {/* Request Line - Blue, Solid, Arrow to Target */}
+        <BaseEdge
+          path={requestPath}
+          style={{
+            stroke: '#3b82f6',
+            strokeWidth: selected ? 3 : 2,
+          }}
+          markerEnd="url(#arrow-blue)"
+        />
+        {/* Invisible wider path for request line for easier clicking */}
         <path
           d={requestPath}
           fill="none"
-          stroke="#3b82f6"
-          strokeWidth={selected ? 3 : 2}
-          markerEnd="url(#arrow-blue)"
-          className="react-flow__edge-path"
-          style={{ pointerEvents: 'none' }}
+          stroke="transparent"
+          strokeWidth={20}
+          style={{ cursor: 'pointer' }}
         />
 
         {/* Response Line - Green, Dashed, Arrow FROM target TO source */}
+        <BaseEdge
+          path={responsePath}
+          style={{
+            stroke: '#10b981',
+            strokeWidth: selected ? 3 : 2,
+            strokeDasharray: '5,5',
+          }}
+          markerEnd="url(#arrow-green)"
+        />
+        {/* Invisible wider path for response line for easier clicking */}
         <path
           d={responsePath}
           fill="none"
-          stroke="#10b981"
-          strokeWidth={selected ? 3 : 2}
-          strokeDasharray="5,5"
-          markerEnd="url(#arrow-green)"
-          className="react-flow__edge-path"
-          style={{ pointerEvents: 'none' }}
+          stroke="transparent"
+          strokeWidth={20}
+          style={{ cursor: 'pointer' }}
         />
 
         {/* Reconnection handles for bidirectional edges - visual indicators only */}
@@ -369,25 +365,23 @@ const CustomEdge = ({
 
   return (
     <>
+      {/* Visible edge path */}
+      <BaseEdge
+        path={edgePath}
+        style={{
+          stroke: '#6b7280',
+          strokeWidth: selected ? 3 : 2,
+        }}
+        markerEnd="url(#arrow-gray)"
+      />
+
       {/* Invisible wider path for easier clicking */}
       <path
         d={edgePath}
         fill="none"
         stroke="transparent"
         strokeWidth={20}
-        className="react-flow__edge-path"
         style={{ cursor: 'pointer' }}
-      />
-
-      {/* Visible edge path */}
-      <path
-        d={edgePath}
-        fill="none"
-        stroke="#6b7280"
-        strokeWidth={selected ? 3 : 2}
-        markerEnd="url(#arrow-gray)"
-        className="react-flow__edge-path"
-        style={{ pointerEvents: 'none' }}
       />
 
       {/* Reconnection handles */}
