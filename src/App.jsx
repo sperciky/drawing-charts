@@ -249,7 +249,7 @@ function App() {
 
     setSelectedNode(null);
     setSelectedEdge(null);
-  }, [reconnectMode, handleCancelReconnection, addClickMarker]);
+  }, [reconnectMode, handleCancelReconnection]);
 
   // Handle connection
   const onConnect = useCallback(
