@@ -10,7 +10,6 @@ const PlatformNode = ({ data, selected, id }) => {
 
   return (
     <div
-      onClick={handleDirectClick}
       className={`bg-white rounded-lg shadow-lg transition-all duration-200 min-w-[250px] ${
         selected ? 'ring-2 ring-blue-500 ring-offset-2' : ''
       }`}
