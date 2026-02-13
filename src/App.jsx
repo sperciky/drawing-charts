@@ -91,15 +91,18 @@ function App() {
 
   // Update all nodes with reconnectMode state so handles can be disabled
   useEffect(() => {
-    setNodes((nds) =>
-      nds.map((node) => ({
+    console.log('🔄 [DEBUG] Updating all nodes with reconnectMode:', !!reconnectMode);
+    setNodes((nds) => {
+      const updated = nds.map((node) => ({
         ...node,
         data: {
           ...node.data,
           reconnectMode: !!reconnectMode
         }
-      }))
-    );
+      }));
+      console.log('✅ [DEBUG] Updated nodes sample:', updated.slice(0, 2).map(n => ({ id: n.id, reconnectMode: n.data.reconnectMode })));
+      return updated;
+    });
   }, [reconnectMode, setNodes]);
 
   // Hooks
