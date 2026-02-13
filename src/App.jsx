@@ -153,6 +153,38 @@ function App() {
     pushState({ nodes, edges });
   }, [nodes, edges]);
 
+  // Visualize clicks with red dots (defined early for use in click handlers)
+  const addClickMarker = useCallback((event) => {
+    if (!reactFlowInstance) return;
+
+    // Get flow coordinates
+    const bounds = reactFlowWrapper.current?.getBoundingClientRect();
+    if (!bounds) return;
+
+    const position = reactFlowInstance.project({
+      x: event.clientX - bounds.left,
+      y: event.clientY - bounds.top,
+    });
+
+    const marker = {
+      id: Date.now(),
+      x: position.x,
+      y: position.y,
+      screenX: event.clientX,
+      screenY: event.clientY,
+      timestamp: new Date().toISOString()
+    };
+
+    console.log('🔴 [CLICK] Visualizing click at:', marker);
+
+    setClickMarkers(prev => [...prev, marker]);
+
+    // Remove marker after 3 seconds
+    setTimeout(() => {
+      setClickMarkers(prev => prev.filter(m => m.id !== marker.id));
+    }, 3000);
+  }, [reactFlowInstance]);
+
   // Handle node click
   const onNodeClick = useCallback((event, clickedNode) => {
     console.log('🖱️ [DEBUG] onNodeClick FIRED!', {
@@ -230,38 +262,6 @@ function App() {
     setSelectedEdge(edge);
     setSelectedNode(null);
   }, []);
-
-  // Visualize clicks with red dots
-  const addClickMarker = useCallback((event) => {
-    if (!reactFlowInstance) return;
-
-    // Get flow coordinates
-    const bounds = reactFlowWrapper.current?.getBoundingClientRect();
-    if (!bounds) return;
-
-    const position = reactFlowInstance.project({
-      x: event.clientX - bounds.left,
-      y: event.clientY - bounds.top,
-    });
-
-    const marker = {
-      id: Date.now(),
-      x: position.x,
-      y: position.y,
-      screenX: event.clientX,
-      screenY: event.clientY,
-      timestamp: new Date().toISOString()
-    };
-
-    console.log('🔴 [CLICK] Visualizing click at:', marker);
-
-    setClickMarkers(prev => [...prev, marker]);
-
-    // Remove marker after 3 seconds
-    setTimeout(() => {
-      setClickMarkers(prev => prev.filter(m => m.id !== marker.id));
-    }, 3000);
-  }, [reactFlowInstance]);
 
   // Handle pane click (deselect)
   const onPaneClick = useCallback((event) => {
