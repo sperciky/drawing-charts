@@ -157,13 +157,10 @@ function App() {
   const addClickMarker = useCallback((event) => {
     if (!reactFlowInstance) return;
 
-    // Get flow coordinates
-    const bounds = reactFlowWrapper.current?.getBoundingClientRect();
-    if (!bounds) return;
-
-    const position = reactFlowInstance.project({
-      x: event.clientX - bounds.left,
-      y: event.clientY - bounds.top,
+    // Use the modern screenToFlowPosition API (no need to subtract bounds!)
+    const position = reactFlowInstance.screenToFlowPosition({
+      x: event.clientX,
+      y: event.clientY,
     });
 
     const marker = {
