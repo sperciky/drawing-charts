@@ -710,6 +710,7 @@ function App() {
               nodeTypes={nodeTypes}
               edgeTypes={edgeTypes}
               edgeUpdaterRadius={0}
+              nodesConnectable={!reconnectMode}
               fitView
               snapToGrid
               snapGrid={[15, 15]}
